@@ -13,11 +13,11 @@ TagManager:
   - UI
   - 
   - 
+  - Item Layer
+  - Ground
+  - Floating Item
   - 
-  - 
-  - 
-  - 
-  - 
+  - Entities
   - 
   - 
   - 
@@ -40,4 +40,19 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 1553333873
+    locked: 0
+  - name: Semi Background
+    uniqueID: 3760541003
+    locked: 0
+  - name: Entities
+    uniqueID: 938031999
+    locked: 0
+  - name: Frontground
+    uniqueID: 2594213735
+    locked: 0
+  - name: UI
+    uniqueID: 2367919079
     locked: 0
