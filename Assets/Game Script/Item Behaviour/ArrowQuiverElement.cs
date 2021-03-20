@@ -7,15 +7,19 @@ public class ArrowQuiverElement : IElementInfo
 {
     [SerializeField] private string _name;
     [SerializeField] private ArrowTypes _type;
+    [SerializeField] private GameRarity _rarity = GameRarity.Common;
     [SerializeField] private ArrowBehaviour _prefab;
     [SerializeField] private Sprite _itemSprite;
     [SerializeField] private int _amountItemOnCollected;
+    [SerializeField] private float _drawingTime;
+    [SerializeField] private float _degreeAnticipation;
 
     private bool _isDisposed = false;
 
     #region Properties
-    public ArrowBehaviour ArrowPrefab => _prefab;
+    public ArrowBehaviour ItemPrefab => _prefab;
     public Sprite ItemSprite => _itemSprite;
+    public float OffsetDegreeAnticipation => _degreeAnticipation;
 
     public ArrowTypes Type
     {
@@ -27,6 +31,12 @@ public class ArrowQuiverElement : IElementInfo
     {
         set => _amountItemOnCollected = value;
         get => _amountItemOnCollected;
+    }
+
+    public float DrawingTime
+    {
+        set => _drawingTime = value;
+        get => _drawingTime;
     }
     #endregion
 

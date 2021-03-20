@@ -10,7 +10,7 @@ public enum EnemyType
     Caster = 3
 }
 
-public class EnemyFactory : IFactoryWithPool<EnemyEntity, EnemyType>
+public class EnemyFactory : IFactoryWithPool<AIEntity, EnemyType>
 {
     private const int MAX_EACH_POOL = 8;
 
@@ -19,17 +19,17 @@ public class EnemyFactory : IFactoryWithPool<EnemyEntity, EnemyType>
 
     }
 
-    public void AddOrReplace(EnemyEntity bev, EnemyType type)
+    public void AddOrReplace(AIEntity bev, EnemyType type)
     {
 
     }
 
-    public EnemyEntity GetObjectRequired(EnemyType type)
+    public AIEntity GetObjectRequired(EnemyType type)
     {
         throw new System.NotImplementedException();
     }
 
-    public EnemyEntity CreateItem(EnemyType type, int amount)
+    public AIEntity CreateItem(EnemyType type, int amount)
     {
         throw new System.NotImplementedException();
     }

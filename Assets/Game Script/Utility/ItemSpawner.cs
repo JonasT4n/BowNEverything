@@ -4,7 +4,7 @@ using UnityEngine;
 using NaughtyAttributes;
 using System.Linq;
 
-public class ItemSpawner : MonoBehaviour
+public class ItemSpawner : MonoBehaviour, ISpawner
 {
     [SerializeField] private FloatingItemBehaviour _prefab = null;
     [SerializeField] private Transform[] _spawnPoints = null;
@@ -12,7 +12,6 @@ public class ItemSpawner : MonoBehaviour
 
     [Space, Header("Spawner Attributes")]
     [SerializeField] private float _secondsInterval = 3f;
-    [SerializeField] [Slider(0, 100)] private float _percentChance = 75f;
 
     private Dictionary<Transform, FloatingItemBehaviour> _createdFloatingItems = new Dictionary<Transform, FloatingItemBehaviour>();
 
@@ -51,7 +50,7 @@ public class ItemSpawner : MonoBehaviour
             else
             {
                 _secIntHandler = _secondsInterval;
-                SpawnItem();
+                Spawn();
             }
         }
     }
@@ -65,16 +64,19 @@ public class ItemSpawner : MonoBehaviour
 
     private void SpawnerPause(PauseGamePressEventArgs args)
     {
-        if (args.Mode != GameMode.MultiPlayer)
+        if (args.Mode != GameModeState.MultiPlayer)
             _isPauseInSinglePlayer = args.IsPause;
     }
 
-    private void SpawnItem()
+    public void Spawn()
     {
         FloatingItemBehaviour f = RandomPointPicker();
         if (f != null)
         {
             f.ItemInfo = RandomInformation(f);
+            if (f.ItemInfo == null)
+                return;
+
             f.gameObject.SetActive(true);
         }
     }
@@ -103,8 +105,11 @@ public class ItemSpawner : MonoBehaviour
 
     private IElementInfo RandomInformation(FloatingItemBehaviour f)
     {
-        ArrowTypes t = (ArrowTypes)Random.Range(0, (int)System.Enum.GetValues(typeof(ArrowTypes)).Cast<ArrowTypes>().Max());
+        ArrowTypes t = (ArrowTypes)Random.Range(0, (int)System.Enum.GetValues(typeof(ArrowTypes)).Cast<ArrowTypes>().Max() + 1);
         ArrowQuiverElement arrowElement = ObjectManager.GetArrowElement(t);
+        if (arrowElement == null)
+            return null;
+
         f.RenderSprite = arrowElement.ItemSprite;
         return arrowElement;
     }

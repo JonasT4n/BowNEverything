@@ -10,6 +10,7 @@ public struct PCKeyMapControl
     [SerializeField] private KeyCode _right;
     [SerializeField] private KeyCode _jump;
     [SerializeField] private KeyCode _shoot;
+    [SerializeField] private KeyCode _rollAmmo;
     [SerializeField] private KeyCode _pause;
 
     public KeyCode MoveLeft
@@ -34,6 +35,12 @@ public struct PCKeyMapControl
     {
         set => _shoot = value;
         get => _shoot;
+    }
+
+    public KeyCode RollAmmo
+    {
+        set => _rollAmmo = value;
+        get => _rollAmmo;
     }
 
     public KeyCode Pause
@@ -61,6 +68,8 @@ public class InputData
     [SerializeField] private bool _shootPressed;
     [SerializeField] private bool _shootHold;
     [SerializeField] private bool _shootReleased;
+
+    [SerializeField] private bool _rollAmmoPressed;
 
     [SerializeField] private bool _pausePressed;
 
@@ -138,6 +147,12 @@ public class InputData
         get => _shootReleased;
     }
 
+    public bool RollAmmoPressed
+    {
+        set => _rollAmmoPressed = value;
+        get => _rollAmmoPressed;
+    }
+
     public bool PausePressed
     {
         set => _pausePressed = value;
@@ -174,6 +189,8 @@ public class InputData
 
 public class InputHandler : MonoBehaviour
 {
+    private static InputHandler _instance;
+
     private static bool _mobileCont = false;
     private static bool _inputLocked = false;
     private static InputData _localInputData;
@@ -184,6 +201,7 @@ public class InputHandler : MonoBehaviour
         MoveRight = KeyCode.D,
         Jump = KeyCode.Space,
         Shoot = KeyCode.Mouse0,
+        RollAmmo = KeyCode.Q,
         Pause = KeyCode.Escape
     };
 
@@ -196,6 +214,19 @@ public class InputHandler : MonoBehaviour
     #region Unity BuiltIn Methods
     private void Awake()
     {
+        // Make it Singleton
+        if (_instance)
+        {
+            Debug.Log($"Deleted multiple object of singleton behaviour: {name}");
+            Destroy(this);
+            return;
+        }
+        else
+        {
+            _instance = this;
+            DontDestroyOnLoad(_instance);
+        }
+
         _inputData.ResetInput();
         _localInputData = _inputData;
         _mobileCont = _mobileControl;
@@ -251,6 +282,7 @@ public class InputHandler : MonoBehaviour
         if (_inputData.ShootReleased)
             _inputData.ShootHold = false;
 
+        _inputData.RollAmmoPressed = Input.GetKeyDown(_keyMap.RollAmmo);
         _inputData.PausePressed = Input.GetKeyDown(_keyMap.Pause);
         _inputData.AimPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }

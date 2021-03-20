@@ -1,18 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using NaughtyAttributes;
 
-public enum GameMode { Tutorial, SinglePlayer, MultiPlayer }
+public enum GameModeState { None = 0, Tutorial, SinglePlayer, MultiPlayer }
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager _instance;
-    private static GameMode _gameModeSetUp = GameMode.SinglePlayer;
 
     [Header("Game System Attributes")]
-    [SerializeField] private GameMode _gameMode = GameMode.SinglePlayer;
+    [SerializeField] private GameModeState _gameMode = GameModeState.None;
+    [SerializeField] private PlayerEntity _mainPlayerPrefab = null;
+    [SerializeField] private EntitySpawner _spawners = null;
 
-    public static GameMode CurrentGameMode => _gameModeSetUp;
+    public GameModeState CurrentGameMode => _gameMode;
 
     #region Unity BuiltIn Methods
     private void Awake()
@@ -31,7 +33,10 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        SetUpGame(_gameMode);
+        if (_spawners == null)
+            _spawners = FindObjectOfType<EntitySpawner>();
+
+        SetUpGame(CurrentGameMode);
     }
 
     // Update is called once per frame
@@ -41,8 +46,13 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    public static void SetUpGame(GameMode g)
+    public void SetUpGame(GameModeState gameMode)
     {
-        _gameModeSetUp = g;
+        switch (gameMode)
+        {
+            case GameModeState.Tutorial:
+                _spawners.RespawnPlayer(Instantiate(_mainPlayerPrefab));
+                break;
+        }
     }
 }

@@ -18,7 +18,7 @@ public class ObjectManager : MonoBehaviour
 
     #region Properties
     public static ArrowFactory ArrowMaker => _arrowFactory;
-    public static EnemyFactory EnemtMaker => _enemyFactory;
+    public static EnemyFactory EnemyMaker => _enemyFactory;
     #endregion
 
     #region Unity BuiltIn Methods
@@ -29,10 +29,12 @@ public class ObjectManager : MonoBehaviour
         {
             Debug.Log($"Deleted multiple object of singleton behaviour: {name}");
             Destroy(this);
+            return;
         }
         else
         {
             _instance = this;
+            DontDestroyOnLoad(this);
         }
 
         // Init objects to be pulled, in this case every kind of arrows
@@ -42,10 +44,7 @@ public class ObjectManager : MonoBehaviour
             if (a.ContainsKey(e.Type))
                 continue;
 
-            if (e.ArrowPrefab.gameObject.activeSelf)
-                e.ArrowPrefab.gameObject.SetActive(false);
-
-            a.Add(e.Type, e.ArrowPrefab);
+            a.Add(e.Type, e.ItemPrefab);
             _kindsOfArrow.Add(e.Type, e);
         }
 
@@ -55,6 +54,9 @@ public class ObjectManager : MonoBehaviour
 
     public static ArrowQuiverElement GetArrowElement(ArrowTypes type)
     {
-        return _kindsOfArrow[type];
+        ArrowQuiverElement e;
+        if (_kindsOfArrow.TryGetValue(type, out e))
+            return e;
+        return null;
     }
 }

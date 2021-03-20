@@ -61,8 +61,13 @@ public class UIManager : MonoBehaviour
 
         if (GameManager._instance != null)
         {
-            PauseGamePressEventArgs arg = new PauseGamePressEventArgs(GameManager.CurrentGameMode, pause);
+            PauseGamePressEventArgs arg = new PauseGamePressEventArgs(GameManager._instance.CurrentGameMode, pause);
             EventHandler.CallEvent(arg);
         }
+    }
+
+    public RectTransform GetDefaultGamePanel()
+    {
+        return _gamePanel;
     }
 }

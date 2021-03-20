@@ -18,9 +18,10 @@ public class PlayerController2D : MonoBehaviour
 
     private BoxCollider2D _collider;
 
+    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool _isGrounded = false;
+    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private float _drawingTimeHandler = 0f;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private Vector2 _moveDir = Vector2.zero;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private Vector2 _aimDir = Vector2.zero;
-    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool _isGrounded = false;
 
     public bool IsGrounded
     {
@@ -40,8 +41,15 @@ public class PlayerController2D : MonoBehaviour
     private void Update()
     {
         if (!_playerControlled.IsPaused)
+        {
             AimControlHandler();
-        if (!_playerControlled.IsPaused || GameManager.CurrentGameMode == GameMode.MultiPlayer)
+
+            // Handle ammo rolling
+            if (InputHandler.LocalInputData.RollAmmoPressed)
+                _playerControlled.NextArrowUse();
+        }
+
+        if (!_playerControlled.IsPaused || GameManager._instance.CurrentGameMode == GameModeState.MultiPlayer)
             MovementControlHandler();
     }
 
@@ -76,7 +84,17 @@ public class PlayerController2D : MonoBehaviour
         Collider2D groundCol = CheckPlayerOnGround();
         _isGrounded = groundCol == null ? false : true;
         if (_moveDir.y > 0)
+        {
             _isGrounded = false;
+
+            Collider2D beforeHitCeiling = CheckCeiling();
+            if (beforeHitCeiling != null)
+            {
+                if (beforeHitCeiling.tag != "Platform")
+                    _moveDir.y = 0;
+            }
+        }
+
         if (_isGrounded)
         {
             _moveDir.y = 0;
@@ -127,6 +145,7 @@ public class PlayerController2D : MonoBehaviour
             Vector3 origin = centerCol - new Vector3(0, extentCol.y + boxSize.y, 0);
             hit = Physics2D.BoxCast(origin, boxSize, 0, Vector2.down, boxSize.y, _groundMask).collider;
 
+            #if UNITY_EDITOR
             // Debugger
             Vector2 leftMostBound = new Vector2(centerCol.x - extentCol.x, centerCol.y - extentCol.y);
             Vector2 rightMostBound = new Vector2(centerCol.x + extentCol.x, centerCol.y - extentCol.y);
@@ -136,6 +155,7 @@ public class PlayerController2D : MonoBehaviour
             Debug.DrawRay(rightMostBound, -new Vector2(0, boxSize.y / 2), Color.red);
             Debug.DrawRay(leftMostBound, new Vector2(distance, 0), Color.red);
             Debug.DrawRay(leftMostBound - new Vector2(0, boxSize.y / 2), new Vector2(distance, 0), Color.red);
+            #endif
         }
         else
         {
@@ -144,6 +164,7 @@ public class PlayerController2D : MonoBehaviour
             Vector3 origin = centerCol - new Vector3(0, extentCol.y + boxSize.y, 0);
             hit = Physics2D.BoxCast(origin, boxSize, 0, Vector2.down, boxSize.y, _groundMask).collider;
 
+            #if UNITY_EDITOR
             // Debugger
             Vector2 leftMostBound = new Vector2(centerCol.x - extentCol.x, centerCol.y - extentCol.y);
             Vector2 rightMostBound = new Vector2(centerCol.x + extentCol.x, centerCol.y - extentCol.y);
@@ -153,15 +174,29 @@ public class PlayerController2D : MonoBehaviour
             Debug.DrawRay(rightMostBound, -new Vector2(0, GROUNDED_SENSITIVITY), Color.cyan);
             Debug.DrawRay(leftMostBound, new Vector2(distance, 0), Color.cyan);
             Debug.DrawRay(leftMostBound - new Vector2(0, GROUNDED_SENSITIVITY), new Vector2(distance, 0), Color.cyan);
+            #endif
         }
 
         return hit;
     }
 
+    private Collider2D CheckCeiling()
+    {
+        // Get collider information
+        Vector3 centerCol = _collider.bounds.center, extentCol = _collider.size / 2;
+
+        // Condition
+        Vector2 boxSize = new Vector2(_collider.size.x, Mathf.Abs(_moveDir.y));
+        Vector3 origin = centerCol + new Vector3(0, extentCol.y + boxSize.y, 0);
+
+        return Physics2D.BoxCast(origin, boxSize, 0, Vector2.down, boxSize.y, _groundMask).collider;
+    }
+
     private void AimControlHandler()
     {
         // Handle aiming by cursor or target something
-        Vector2 mousePos = InputHandler.LocalInputData.AimPosition;
+        InputData localData = InputHandler.LocalInputData;
+        Vector2 mousePos = localData.AimPosition;
         _aimDir = (mousePos - new Vector2(transform.position.x, transform.position.y)).normalized;
 
         float degreeAngle = Mathf.Atan(_aimDir.y / _aimDir.x) * Mathf.Rad2Deg;
@@ -173,11 +208,31 @@ public class PlayerController2D : MonoBehaviour
         _aimPivot.eulerAngles = new Vector3(0, 0, degreeAngle);
 
         // Handle shoot
-        if (InputHandler.LocalInputData.ShootPressed)
+        if (_playerControlled.CurrentUse != ArrowTypes.None)
         {
-            Vector3 playerPos = _playerControlled.transform.position;
-            Vector2 shootDir = (mousePos - new Vector2(playerPos.x, playerPos.y)).normalized;
-            EventHandler.CallEvent(new PlayerShootEventArgs(_playerControlled, shootDir, ArrowTypes.Normal));
+            if (_drawingTimeHandler <= 0 && localData.ShootReleased)
+            {
+                Vector3 playerPos = _playerControlled.transform.position;
+                Vector2 shootDir = (mousePos - new Vector2(playerPos.x, playerPos.y)).normalized;
+                _playerControlled.BowShoot(shootDir);
+            }
+
+            if (localData.ShootHold)
+                _drawingTimeHandler -= Time.deltaTime;
+
+            if (localData.ShootPressed)
+                _drawingTimeHandler = ObjectManager.GetArrowElement(_playerControlled.CurrentUse).DrawingTime;
+
+            // Update drawing time information on ui
+            EntityUIInformation info = _playerControlled.gameObject.GetComponent<EntityUIInformation>();
+            if (info != null)
+            {
+                if (_drawingTimeHandler == Mathf.Infinity)
+                    info.DrawingTimeValue = 0;
+                else
+                    if (ObjectManager.GetArrowElement(_playerControlled.CurrentUse) != null)
+                        info.DrawingTimeValue = 1 - (_drawingTimeHandler / ObjectManager.GetArrowElement(_playerControlled.CurrentUse).DrawingTime);
+            }
         }
     }
     #endregion
@@ -186,6 +241,8 @@ public class PlayerController2D : MonoBehaviour
     private void PauseGameEvent(PauseGamePressEventArgs args)
     {
         _playerControlled.IsPaused = args.IsPause;
+        ArrowQuiverElement e = ObjectManager.GetArrowElement(_playerControlled.CurrentUse);
+        _drawingTimeHandler = e == null ? Mathf.Infinity : e.DrawingTime;
     }
     #endregion
 

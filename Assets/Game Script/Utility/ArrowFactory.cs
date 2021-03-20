@@ -4,7 +4,24 @@ using UnityEngine;
 
 public enum ArrowTypes
 {
-    Normal = 0
+    None = 0,
+    Normal = 1,
+    ChopStick = 2
+    //Bounce = 2,
+    //Glue = 3,
+    //IceBlade = 4,
+    //Anvil = 5,
+    //FireCracker = 6,
+    //Dynamite = 7,
+    //MathBook = 8
+}
+
+public enum GameRarity
+{
+    Trash = 0,
+    Common = 1,
+    Uncommon = 2,
+    Rare = 3
 }
 
 public class ArrowFactory : IFactoryWithPool<ArrowBehaviour, ArrowTypes>
@@ -23,12 +40,17 @@ public class ArrowFactory : IFactoryWithPool<ArrowBehaviour, ArrowTypes>
 
         foreach (ArrowTypes a in _prefabs.Keys)
         {
+            if (a == ArrowTypes.None)
+                continue;
+
             ArrowBehaviour pref = _prefabs[a];
             _pool.Add(a, new Queue<ArrowBehaviour>());
 
             for (int i = 0; i < MAX_EACH_POOL; i++)
             {
                 ArrowBehaviour dupe = Object.Instantiate(pref);
+                dupe.gameObject.SetActive(false);
+
                 if (_poolContainer != null)
                     dupe.transform.parent = _poolContainer;
                 _pool[a].Enqueue(dupe);
