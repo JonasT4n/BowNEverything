@@ -353,9 +353,36 @@ MonoBehaviour:
   m_Text: 'CREDIT
 
 
-    BGM
+    ~ Music ~
 
-    Shady Dave'
+
+    [BGM]
+
+    Shady Dave
+
+
+    ~ Artists ~
+
+
+    Carlos
+    Tanoto
+
+    Ben Christo
+
+
+    ~ Programmer ~
+
+
+    Jonas Tan
+
+
+    ~ Game Designer
+    ~
+
+
+    Jose Anthony
+
+    Kevin Francis Rhien'
 --- !u!222 &128287246
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1804,7 +1831,7 @@ GameObject:
   - component: {fileID: 1375178762}
   - component: {fileID: 1375178761}
   m_Layer: 5
-  m_Name: Credit
+  m_Name: Credit Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
