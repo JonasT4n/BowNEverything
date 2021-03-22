@@ -10,26 +10,67 @@ public enum EnemyType
     Caster = 3
 }
 
-public class EnemyFactory : IFactoryWithPool<AIEntity, EnemyType>
+public class EnemyFactory : IFactoryWithPool<EnemyEntity, EnemyType>
 {
-    private const int MAX_EACH_POOL = 8;
+    private const int MAX_EACH_POOL = 25;
 
-    public EnemyFactory()
+    private Transform _poolContainer;
+    private Dictionary<EnemyType, EnemyEntity> _prefabs;
+    private Dictionary<EnemyType, Queue<EnemyEntity>> _pool = new Dictionary<EnemyType, Queue<EnemyEntity>>();
+
+    public EnemyFactory(Dictionary<EnemyType, EnemyEntity> prefabs, Transform container = null)
     {
+        _prefabs = prefabs;
+        _poolContainer = container;
 
+        foreach (EnemyType e in _prefabs.Keys)
+        {
+            EnemyEntity enemyPref = _prefabs[e];
+            _pool.Add(e, new Queue<EnemyEntity>());
+
+            for (int i = 0; i < MAX_EACH_POOL; i++)
+            {
+                EnemyEntity dupe = Object.Instantiate(enemyPref);
+                dupe.InformationUI.MaxHealthValue = dupe.MaxHealth;
+                dupe.gameObject.SetActive(false);
+
+                if (_poolContainer != null)
+                    dupe.transform.parent = _poolContainer;
+                _pool[e].Enqueue(dupe);
+            }
+        }
     }
 
-    public void AddOrReplace(AIEntity bev, EnemyType type)
+    public void AddOrReplace(EnemyEntity bev, EnemyType type)
     {
-
+        EnemyEntity b;
+        if (_prefabs.TryGetValue(type, out b))
+        {
+            _prefabs.Remove(type);
+            _prefabs.Add(type, bev);
+        }
+        else
+        {
+            _prefabs.Add(type, bev);
+        }
     }
 
-    public AIEntity GetObjectRequired(EnemyType type)
+    public EnemyEntity GetObjectRequired(EnemyType type)
     {
-        throw new System.NotImplementedException();
+        Queue<EnemyEntity> pool;
+        if (_pool.TryGetValue(type, out pool))
+        {
+            if (pool.Count <= 0)
+                return null;
+
+            EnemyEntity arr = pool.Dequeue();
+            arr.PoolReference = pool;
+            return arr;
+        }
+        return null;
     }
 
-    public AIEntity CreateItem(EnemyType type, int amount)
+    public EnemyEntity CreateItem(EnemyType type, int amount)
     {
         throw new System.NotImplementedException();
     }

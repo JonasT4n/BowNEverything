@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Events;
 using NaughtyAttributes;
 
 public class PlayerEntity : LivingEntity
@@ -12,6 +12,11 @@ public class PlayerEntity : LivingEntity
     [SerializeField] private Animator _animator = null;
     [SerializeField] private SpriteRenderer _anticipatorRenderer = null;
 
+    [Space, Header("Additional Events")]
+    [SerializeField] private UnityEvent _pullArrowEvent = null;
+    [SerializeField] private UnityEvent _releaseArrowEvent = null;
+
+    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private int _enemyKilled = 0;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private List<ArrowTypes> _haveArrows = new List<ArrowTypes>();
 
     private Dictionary<ArrowTypes, int> _quiver;
@@ -28,15 +33,23 @@ public class PlayerEntity : LivingEntity
             return _haveArrows[_currentUse];
         }
     }
+    public int EnemyKillCount
+    {
+        set => _enemyKilled = value;
+        get => _enemyKilled;
+    }
 
     #region Unity BuiltIn Methods
     private void OnEnable()
     {
         // Subscribe event
         EventHandler.OnPlayerCollectedItemEvent += FloatingItemCollected;
+        EventHandler.OnPlayerChangeArrowEvent += PlayerChangeArrow;
 
         if (tag == "MainPlayer")
             FindObjectOfType<CameraAutoController>().CenterHook = transform;
+
+        InformationUI.ShowUIFollower(true);
     }
 
     // Start is called before the first frame update
@@ -51,10 +64,14 @@ public class PlayerEntity : LivingEntity
     {
         // Unsubscribe event
         EventHandler.OnPlayerCollectedItemEvent -= FloatingItemCollected;
+        EventHandler.OnPlayerChangeArrowEvent -= PlayerChangeArrow;
 
         CameraAutoController autoCam = FindObjectOfType<CameraAutoController>();
         if (tag == "MainPlayer" && autoCam != null)
             autoCam.CenterHook = null;
+
+        ResetEntityValues();
+        InformationUI.ShowUIFollower(false);
     }
     #endregion
 
@@ -70,11 +87,20 @@ public class PlayerEntity : LivingEntity
         {
             ArrowQuiverElement arrowElement = (ArrowQuiverElement)args.InfoElement;
             CollectArrow(arrowElement.Type, arrowElement.CollectAmount);
-            Debug.Log($"Collected: {_quiver[arrowElement.Type]}");
         }
 
         // Disable floating item, means that the item has been collected by player
         args.CollectedItem.gameObject.SetActive(false);
+    }
+
+    private void PlayerChangeArrow(PlayerChangeArrowEventArgs args)
+    {
+        if (args.Player.gameObject.Equals(gameObject))
+        {
+            ArrowQuiverElement e = ObjectManager._instance.GetArrowElement(args.ChangeTo);
+            _anticipatorRenderer.sprite = e == null ? null : e.ItemSprite;
+            _anticipatorRenderer.transform.localEulerAngles = e == null ? Vector3.zero : new Vector3(0, 0, e.OffsetDegreeAnticipation);
+        }
     }
     #endregion
 
@@ -86,6 +112,26 @@ public class PlayerEntity : LivingEntity
         InformationUI.HealthValue = CurrentHealth;
     }
 
+    public override void AddForce(Vector2 forceDir, ForceMode2D force)
+    {
+        switch (force)
+        {
+            case ForceMode2D.Force:
+                CurrentVelocity += forceDir * Time.deltaTime;
+                break;
+
+            case ForceMode2D.Impulse:
+                CurrentVelocity = forceDir;
+                break;
+        }
+    }
+
+    public override void AddEffects(EntityEffects effect, float value, bool temporary = true)
+    {
+        if (temporary)
+            StartCoroutine(TemporaryEffect(effect, -value, 3f));
+    }
+
     public override void ResetEntityValues()
     {
         CurrentHealth = MaxHealth;
@@ -93,11 +139,51 @@ public class PlayerEntity : LivingEntity
         InformationUI.HealthValue = CurrentHealth;
         InformationUI.DrawingTimeValue = 0;
     }
+
+    protected override IEnumerator TemporaryEffect(EntityEffects effect, float negativeValue, float seconds)
+    {
+        float tempTime = seconds;
+        while (tempTime > 0)
+        {
+            tempTime -= Time.deltaTime;
+            yield return null;
+        }
+
+        AddEffects(effect, negativeValue);
+    }
     #endregion
 
     public void BowShoot(Vector2 shootDir)
     {
-        ArrowBehaviour arrow = ObjectManager.ArrowMaker.GetObjectRequired(CurrentUse);
+        bool isShoot = false;
+        switch (CurrentUse)
+        {
+            case ArrowTypes.ChopStick:
+                float offsetDegree = 15f;
+                float degreeChopstick = Mathf.Atan(shootDir.y / shootDir.x) * Mathf.Rad2Deg;
+                isShoot = Shoot(CurrentUse, RadianToVector2((degreeChopstick + offsetDegree + (shootDir.x < 0 ? 180 : 0)) * Mathf.Deg2Rad));
+                bool isSecondShoot = Shoot(CurrentUse, RadianToVector2((degreeChopstick - offsetDegree + (shootDir.x < 0 ? 180 : 0)) * Mathf.Deg2Rad));
+                isShoot = isShoot || isSecondShoot;
+                break;
+
+            default:
+                isShoot = Shoot(ArrowTypes.Normal, shootDir);
+                break;
+        }
+
+        if (isShoot)
+            _releaseArrowEvent?.Invoke();
+    }
+
+    /// <summary>
+    /// Check whether the things is being shoot
+    /// </summary>
+    /// <param name="type">Type arrow shoot</param>
+    /// <param name="shootDir">Direction shoot</param>
+    /// <returns>true if successfully shoot</returns>
+    private bool Shoot(ArrowTypes type, Vector2 shootDir)
+    {
+        ArrowBehaviour arrow = ObjectManager._instance.ArrowMaker.GetObjectRequired(CurrentUse);
         if (!arrow.gameObject.activeSelf)
             arrow.gameObject.SetActive(true);
 
@@ -105,11 +191,20 @@ public class PlayerEntity : LivingEntity
         PlayerShootEventArgs arg = new PlayerShootEventArgs(this, shootDir, arrow);
         EventHandler.CallEvent(arg);
 
-        arrow.Shoot(_bowNeedle == null ? transform.position : _bowNeedle.position, arg.ShootDirection);
+        if (!arg.IsCancelled)
+            arrow.Shoot(_bowNeedle == null ? transform.position : _bowNeedle.position, arg.ShootDirection);
 
         int leftOver;
         if (_quiver.TryGetValue(CurrentUse, out leftOver))
-            CollectArrow(CurrentUse, -1);
+            if (!arg.KeepQuantity)
+                CollectArrow(CurrentUse, -1);
+
+        return !arg.IsCancelled;
+    }
+
+    public void CallPullArrowEvent()
+    {
+        _pullArrowEvent?.Invoke();
     }
 
     /// <summary>
@@ -117,15 +212,18 @@ public class PlayerEntity : LivingEntity
     /// </summary>
     public void NextArrowUse()
     {
+        ArrowTypes temp = CurrentUse;
         if (_currentUse < 0)
             return;
 
         _currentUse = _currentUse + 1 >= _haveArrows.Count ? 0 : _currentUse + 1;
-        ChangeAnticipatorSpriteRenderer(ObjectManager.GetArrowElement(_haveArrows[_currentUse]));
+        EventHandler.CallEvent(new PlayerChangeArrowEventArgs(this, CurrentUse));
     }
 
     public void CollectArrow(ArrowTypes type, int amount)
     {
+        ArrowTypes temp = CurrentUse;
+
         // Find and add arrow by type with amount
         if (!_quiver.ContainsKey(type))
         {
@@ -148,7 +246,6 @@ public class PlayerEntity : LivingEntity
         if (_haveArrows.Count <= 0)
         {
             _currentUse = -1;
-            ChangeAnticipatorSpriteRenderer(null);
         }
         else
         {
@@ -156,13 +253,16 @@ public class PlayerEntity : LivingEntity
                 _currentUse = 0;
             else if (_currentUse >= _haveArrows.Count)
                 _currentUse = _haveArrows.Count - 1;
-            ChangeAnticipatorSpriteRenderer(ObjectManager.GetArrowElement(_haveArrows[_currentUse]));
         }
+
+        if (CurrentUse != temp)
+            EventHandler.CallEvent(new PlayerChangeArrowEventArgs(this, CurrentUse));
     }
 
-    private void ChangeAnticipatorSpriteRenderer(ArrowQuiverElement e)
+    #region Static Utility Methods
+    private static Vector2 RadianToVector2(float radian)
     {
-        _anticipatorRenderer.sprite = e == null ? null : e.ItemSprite;
-        _anticipatorRenderer.transform.localEulerAngles = e == null ? Vector3.zero : new Vector3(0, 0, e.OffsetDegreeAnticipation);
+        return new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
     }
+    #endregion
 }

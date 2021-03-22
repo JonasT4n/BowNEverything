@@ -5,18 +5,19 @@ using UnityEngine;
 [System.Serializable]
 public class ArrowQuiverElement : IElementInfo
 {
-    [SerializeField] private string _name;
-    [SerializeField] private ArrowTypes _type;
+    [SerializeField] private string _name = "";
+    [SerializeField] private ArrowTypes _type = ArrowTypes.None;
     [SerializeField] private GameRarity _rarity = GameRarity.Common;
-    [SerializeField] private ArrowBehaviour _prefab;
-    [SerializeField] private Sprite _itemSprite;
-    [SerializeField] private int _amountItemOnCollected;
-    [SerializeField] private float _drawingTime;
-    [SerializeField] private float _degreeAnticipation;
+    [SerializeField] private ArrowBehaviour _prefab = null;
+    [SerializeField] private Sprite _itemSprite = null;
+    [SerializeField] private int _amountItemOnCollected = 0;
+    [SerializeField] private float _drawingTime = 1f;
+    [SerializeField] private float _degreeAnticipation = 0;
 
     private bool _isDisposed = false;
 
     #region Properties
+    public string Name => _name;
     public ArrowBehaviour ItemPrefab => _prefab;
     public Sprite ItemSprite => _itemSprite;
     public float OffsetDegreeAnticipation => _degreeAnticipation;

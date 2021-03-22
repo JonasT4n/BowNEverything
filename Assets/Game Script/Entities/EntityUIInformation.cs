@@ -72,4 +72,10 @@ public class EntityUIInformation : MonoBehaviour
         _uiFollowerPrefab.TargetFollow = _entity.transform;
     }
     #endregion
+
+    public void ShowUIFollower(bool show)
+    {
+        if (_placeholderMaster != null)
+            _placeholderMaster.gameObject.SetActive(show);
+    }
 }

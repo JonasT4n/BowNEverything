@@ -9,7 +9,7 @@ public class GameAIAutoController : MonoBehaviour
 
     [Header("Controller Attributes")]
     [SerializeField] private LayerMask _groundMask = ~0;
-    [SerializeField] private float _walkSpeed = 0.3f;
+    [SerializeField] private LayerMask _wallMask = ~0;
     [SerializeField] private float _jumpForce = 0.75f;
     [SerializeField] private float _gravityWeight = 2.85f;
     [SerializeField] private BoxCollider2D _collider = null;
@@ -20,24 +20,17 @@ public class GameAIAutoController : MonoBehaviour
     [SerializeField] private Vector2 _detectRangeXY = new Vector2(100f, 5f);
     [SerializeField] private float _targetDistanceAttack = 1f;
 
-    private AIEntity _entityControlled;
+    private EnemyEntity _entityControlled;
     private Vector2 _onPauseMoveDirHolder;
 
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool _isGrounded = false;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private float _attackTimeHolder;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private Transform _targetDetected = null;
-    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private Vector2 _moveDir = Vector2.zero;
 
     #region Unity BuiltIn Methods
-    private void OnEnable()
-    {
-        // Subscribe events
-        EventHandler.OnArrowHitEvent += OnAIHit;
-    }
-
     private void Awake()
     {
-        _entityControlled = GetComponent<AIEntity>();
+        _entityControlled = GetComponent<EnemyEntity>();
     }
 
     // Start is called before the first frame update
@@ -52,59 +45,43 @@ public class GameAIAutoController : MonoBehaviour
         DetectEnemy();
         PhysicalBodyControl();
     }
-
-    private void OnDisable()
-    {
-        // Unsubscribe events
-        EventHandler.OnArrowHitEvent -= OnAIHit;
-    }
-    #endregion
-
-    #region Event Methods
-    private void OnAIHit(ArrowHitEventArgs args)
-    {
-        if (args.VictimHit.gameObject.Equals(gameObject))
-        {
-            _isGrounded = false;
-            _moveDir.y = _gravityWeight / 2f;
-        }
-    }
     #endregion
 
     private void PhysicalBodyControl()
     {
+        // Get info origin
+        Vector2 curMoveVel = _entityControlled.CurrentVelocity;
+
         // Check X Control
         if (_targetDetected != null)
         {
             float targetDistance = Vector2.Distance(_targetDetected.position, transform.position);
             if (targetDistance < Vector2.Distance(_detectRangeXY, Vector2.zero))
             {
-                _moveDir.x += (_targetDetected.position.x - transform.position.x < 0 ? -1f :
-                    _targetDetected.position.x - transform.position.x > 0 ? 1f : 0) * _walkSpeed * Time.deltaTime;
-
-                // Making sure the enemy not exceeded the speed.
-                if (Mathf.Abs(_moveDir.x) > _walkSpeed)
-                    _moveDir.x = _moveDir.x < 0 ? -_walkSpeed : _walkSpeed;
+                curMoveVel.x = (_targetDetected.position.x - transform.position.x < 0 ? -1f :
+                    _targetDetected.position.x - transform.position.x > 0 ? 1f : 0) * _entityControlled.Speed;
 
                 // Check attack control
                 if (targetDistance < _targetDistanceAttack)
                 {
-                    _moveDir.x = 0;
+                    curMoveVel.x = 0;
                     RunAttackInterval();
                 }
             }
         }
         else
         {
-            // Temporary
-            _moveDir.x = 0;
+            float prevXDir = curMoveVel.x;
+            curMoveVel.x += curMoveVel.x < 0 ? _gravityWeight * Time.deltaTime : (curMoveVel.x > 0 ? -_gravityWeight * Time.deltaTime : 0);
+            if ((curMoveVel.x < 0 && prevXDir > 0) || (curMoveVel.x > 0 && prevXDir < 0))
+                curMoveVel.x = 0;
         }
 
         // Check Y control
         Collider2D groundCol = CheckAIOnGround();
         _isGrounded = groundCol == null ? false : true;
 
-        if (_moveDir.y > 0)
+        if (curMoveVel.y > 0)
         {
             _isGrounded = false;
 
@@ -112,38 +89,41 @@ public class GameAIAutoController : MonoBehaviour
             if (beforeHitCeiling != null)
             {
                 if (beforeHitCeiling.tag != "Platform")
-                    _moveDir.y = 0;
+                    curMoveVel.y = 0;
             }
         }
 
         if (_isGrounded)
         {
-            _moveDir.y = 0;
+            curMoveVel.y = 0;
         }
         else
         {
             // Make sure the jump is consistent
-            if (_moveDir.y > _jumpForce)
-                _moveDir.y = _jumpForce;
+            if (curMoveVel.y > _jumpForce)
+                curMoveVel.y = _jumpForce;
 
-            _moveDir.y -= _gravityWeight * Time.deltaTime;
-            if (_moveDir.y > _gravityWeight)
-                _moveDir.y = _gravityWeight;
+            curMoveVel.y -= _gravityWeight * Time.deltaTime;
+            if (curMoveVel.y > _gravityWeight)
+                curMoveVel.y = _gravityWeight;
 
             // Check before drop collision
             Collider2D beforeGroundCol = CheckAIOnGround(true);
             if (beforeGroundCol != null)
             {
-                float bottomMostY = _collider.bounds.center.y - _collider.bounds.extents.y + _moveDir.y;
+                float bottomMostY = _collider.bounds.center.y - _collider.bounds.extents.y + curMoveVel.y;
                 float topMostColY = beforeGroundCol.bounds.center.y + beforeGroundCol.bounds.extents.y;
 
                 if (bottomMostY < topMostColY)
-                    _moveDir.y += topMostColY - bottomMostY;
+                    curMoveVel.y += topMostColY - bottomMostY;
             }
         }
 
         // Return information to origin
-        transform.Translate(_moveDir);
+        transform.Translate(curMoveVel);
+
+        // Send back info to origin
+        _entityControlled.CurrentVelocity = curMoveVel;
     }
 
     private void IdlePatrolControl()
@@ -157,10 +137,10 @@ public class GameAIAutoController : MonoBehaviour
         Vector3 centerCol = _collider.bounds.center, extentCol = _collider.size / 2;
 
         Collider2D hit = null;
-        if (afterDropChecker && _moveDir.y < 0)
+        if (afterDropChecker && _entityControlled.CurrentVelocity.y < 0)
         {
             // Condition
-            Vector2 boxSize = new Vector2(_collider.size.x, Mathf.Abs(_moveDir.y));
+            Vector2 boxSize = new Vector2(_collider.size.x, Mathf.Abs(_entityControlled.CurrentVelocity.y));
             Vector3 origin = centerCol - new Vector3(0, extentCol.y + boxSize.y, 0);
             hit = Physics2D.BoxCast(origin, boxSize, 0, Vector2.down, boxSize.y, _groundMask).collider;
 
@@ -205,7 +185,7 @@ public class GameAIAutoController : MonoBehaviour
         Vector3 centerCol = _collider.bounds.center, extentCol = _collider.size / 2;
 
         // Condition
-        Vector2 boxSize = new Vector2(_collider.size.x, Mathf.Abs(_moveDir.y));
+        Vector2 boxSize = new Vector2(_collider.size.x, Mathf.Abs(_entityControlled.CurrentVelocity.y));
         Vector3 origin = centerCol + new Vector3(0, extentCol.y + boxSize.y, 0);
 
         return Physics2D.BoxCast(origin, boxSize, 0, Vector2.down, boxSize.y, _groundMask).collider;
@@ -223,13 +203,12 @@ public class GameAIAutoController : MonoBehaviour
         Collider2D targetLocked = null;
         foreach(RaycastHit2D h in hits)
         {
-            if (h.collider.gameObject.Equals(gameObject))
+            if (h.collider.gameObject.Equals(gameObject) || h.collider.gameObject.GetComponent<EnemyEntity>())
                 continue;
 
             Vector3 targetPos = h.collider.transform.position;
             if (Vector2.Distance(targetPos, transform.position) < nearestEnemyDistance)
                 targetLocked = h.collider;
-
         }
 
         _targetDetected = targetLocked == null ? null : targetLocked.transform;
@@ -244,12 +223,7 @@ public class GameAIAutoController : MonoBehaviour
         else
         {
             _attackTimeHolder = _attackInterval;
-            Attack();
+            _entityControlled.Attack(_targetDetected);
         }
-    }
-
-    public void Attack()
-    {
-        // TODO: Enemy Type Attacks
     }
 }

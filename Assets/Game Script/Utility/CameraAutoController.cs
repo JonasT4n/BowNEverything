@@ -6,7 +6,8 @@ using NaughtyAttributes;
 [RequireComponent(typeof(Camera))]
 public class CameraAutoController : MonoBehaviour
 {
-    private const float SIZE_LIMIT = 30f;
+    private const float SIZE_LIMIT = 50f;
+    private const int MAX_DETECT = 4;
 
     [Header("Auto Controller Attributes")]
     [SerializeField] private float _camMoveSpeed = 1f;
@@ -17,6 +18,8 @@ public class CameraAutoController : MonoBehaviour
         " other entities by distance.")]
     [SerializeField] private Transform _centerHook = null;
     [SerializeField] private Vector2 _offsetPosition = Vector2.zero;
+    [SerializeField] private Vector2 _maxMoveCoor = new Vector2(120f, 40f);
+    [SerializeField] private Vector2 _minMoveCoor = new Vector2(-50f, -35);
 
     private Camera _cam;
 
@@ -84,6 +87,15 @@ public class CameraAutoController : MonoBehaviour
             if (distanceAfterMove > distance || distance < 0.005f)
                 afterMove = targetPosition;
 
+            if (afterMove.x < _minMoveCoor.x)
+                afterMove.x = _minMoveCoor.x;
+            if (afterMove.x > _maxMoveCoor.x)
+                afterMove.x = _maxMoveCoor.x;
+            if (afterMove.y < _minMoveCoor.y)
+                afterMove.y = _minMoveCoor.y;
+            if (afterMove.y > _maxMoveCoor.y)
+                afterMove.y = _maxMoveCoor.y;
+
             transform.position = new Vector3(afterMove.x, afterMove.y, transform.position.z);
         }
 
@@ -113,17 +125,31 @@ public class CameraAutoController : MonoBehaviour
 
     private void DetectEntityNearby()
     {
-        LivingEntity[] entities = FindObjectsOfType<LivingEntity>();
-        foreach (LivingEntity ent in entities)
+        if (_targets.Count < MAX_DETECT)
         {
-            if (ent.gameObject.Equals(_centerHook.gameObject))
-                continue;
+            LivingEntity[] entities = FindObjectsOfType<LivingEntity>();
+            foreach (LivingEntity ent in entities)
+            {
+                if (ent.gameObject.Equals(_centerHook.gameObject))
+                    continue;
 
-            Vector3 entPos = ent.transform.position;
-            if (Vector2.Distance(entPos, _centerHook.position) <= _maxRangeCameraEntity && !_targets.Contains(ent.transform))
-                _targets.Add(ent.transform);
-            else if (Vector2.Distance(entPos, _centerHook.position) > _maxRangeCameraEntity && _targets.Contains(ent.transform))
-                _targets.Remove(ent.transform);
+                Vector3 entPos = ent.transform.position;
+                if (Vector2.Distance(entPos, _centerHook.position) <= _maxRangeCameraEntity && !_targets.Contains(ent.transform))
+                    _targets.Add(ent.transform);
+                else if (Vector2.Distance(entPos, _centerHook.position) > _maxRangeCameraEntity && _targets.Contains(ent.transform))
+                    _targets.Remove(ent.transform);
+            }
+        }
+
+        // Remove all of death entities
+        for (int i = 0; i < _targets.Count; i++)
+        {
+            Transform t = _targets[i];
+            if (!t.gameObject.activeSelf)
+            {
+                _targets.Remove(t);
+                i--;
+            }
         }
     }
 }

@@ -17,6 +17,14 @@ public class NormalArrow : ArrowBehaviour
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool _hitSmh = false;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool _freeze = false;
 
+    protected Rigidbody2D ArrowRigid => _rigid2D;
+    protected Animator ArrowAnimator => _arrowAnim;
+    protected bool IsAlreadyHit
+    {
+        set => _hitSmh = value;
+        get => _hitSmh;
+    }
+
     #region Unity BuiltIn Methods
     private void OnEnable()
     {
@@ -25,7 +33,6 @@ public class NormalArrow : ArrowBehaviour
 
         // Subscribe event
         EventHandler.OnGamePauseEvent += ArrowFreezeOnSinglePlayer;
-        EventHandler.OnArrowHitEvent += OnHitEvent;
         EventHandler.OnPlayerShootEvent += ArrowBeingShoot;
     }
 
@@ -35,18 +42,8 @@ public class NormalArrow : ArrowBehaviour
         if (!_hitSmh && !_freeze)
         {
             _velHolder = _rigid2D.velocity;
-
-            // Adjust realistic rotation
-            float rotDegree = Mathf.Atan(_velHolder.y / _velHolder.x) * Mathf.Rad2Deg;
-            ArrowQuiverElement e = ObjectManager.GetArrowElement(TypeOfArrow);
-            rotDegree = rotDegree + (e == null ? 0 : e.OffsetDegreeAnticipation);
-            Renderer.transform.eulerAngles = new Vector3(0, 0, rotDegree);
-
-            // Determine sprite flip
-            if (_velHolder.x < 0)
-                Renderer.flipX = true;
-            else
-                Renderer.flipX = false;
+            if (_simulateRotation)
+                HandleOnAirRotation(_velHolder);
         }
     }
 
@@ -54,7 +51,6 @@ public class NormalArrow : ArrowBehaviour
     {
         // Unsubscribe event
         EventHandler.OnGamePauseEvent -= ArrowFreezeOnSinglePlayer;
-        EventHandler.OnArrowHitEvent -= OnHitEvent;
         EventHandler.OnPlayerShootEvent -= ArrowBeingShoot;
     }
 
@@ -63,13 +59,14 @@ public class NormalArrow : ArrowBehaviour
         if (collision.gameObject.tag == "MainCamera" || _hitSmh)
             return;
 
-        if (!Who.gameObject.Equals(collision.gameObject))
+        if (collision.gameObject.layer == LayerMask.NameToLayer("VOID"))
         {
-            _hitSmh = true;
-            _rigid2D.isKinematic = true;
-            _rigid2D.velocity = Vector2.zero;
-            EventHandler.CallEvent(new ArrowHitEventArgs(Who, collision, this));
+            gameObject.SetActive(false);
+            _poolRef.Enqueue(this);
         }
+
+        if (!WhoShot.gameObject.Equals(collision.gameObject))
+            OnHitEffect(collision);
     }
     #endregion
 
@@ -83,29 +80,11 @@ public class NormalArrow : ArrowBehaviour
     #region Event Methods
     private void ArrowFreezeOnSinglePlayer(PauseGamePressEventArgs args)
     {
-        if (!_hitSmh)
+        if (!_hitSmh && GameManager._instance.CurrentGameMode != GameModeState.MultiPlayer)
         {
-            if (args.IsPause && GameManager._instance.CurrentGameMode != GameModeState.MultiPlayer)
-            {
-                _freeze = true;
-                _rigid2D.isKinematic = true;
-                _rigid2D.velocity = Vector2.zero;
-            }
-            else if (!args.IsPause && GameManager._instance.CurrentGameMode != GameModeState.MultiPlayer)
-            {
-                _freeze = false;
-                _rigid2D.isKinematic = false;
-                _rigid2D.velocity = _velHolder;
-            }
-        }
-    }
-
-    private void OnHitEvent(ArrowHitEventArgs args)
-    {
-        if (args.ArrowHit.Equals(this))
-        {
-            _arrowAnim.SetBool("Is Landed", true);
-            OnHitEffect(_collider.bounds.center, args.VictimHit.gameObject.GetComponent<LivingEntity>());
+            _freeze = args.IsPause;
+            _rigid2D.isKinematic = args.IsPause;
+            _rigid2D.velocity = args.IsPause ? Vector2.zero : _velHolder;
         }
     }
 
@@ -116,6 +95,28 @@ public class NormalArrow : ArrowBehaviour
     }
     #endregion
 
+    protected virtual void HandleOnAirRotation(Vector2 velocity)
+    {
+        // Adjust realistic rotation
+        float rotDegree = Mathf.Atan(_velHolder.y / _velHolder.x) * Mathf.Rad2Deg;
+        ArrowQuiverElement e = ObjectManager._instance.GetArrowElement(TypeOfArrow);
+
+        // Determine sprite flip
+        if (_velHolder.x < 0)
+        {
+            Renderer.flipX = true;
+            rotDegree = rotDegree + (e == null ? 0 : -e.OffsetDegreeAnticipation);
+        }
+        else
+        {
+            Renderer.flipX = false;
+            rotDegree = rotDegree + (e == null ? 0 : e.OffsetDegreeAnticipation);
+        }
+
+        // Apply Rotation
+        Renderer.transform.eulerAngles = new Vector3(0, 0, rotDegree);
+    }
+
     protected virtual void OnShootEffect(Vector2 origin, Vector2 shootDir)
     {
         _hitSmh = false;
@@ -123,17 +124,52 @@ public class NormalArrow : ArrowBehaviour
         _rigid2D.AddForce(shootDir * MaxShootForce, ForceMode2D.Impulse);
     }
 
-    protected virtual void OnHitEffect(Vector3 pos, LivingEntity hit = null)
+    protected virtual void OnHitEffect(Collider2D collision)
     {
-        if (hit != null)
+        ArrowHitEventArgs arg = new ArrowHitEventArgs(WhoShot, collision, this);
+        EventHandler.CallEvent(arg);
+
+        if (!arg.IsCancelled)
         {
-            hit.AddHealth(Damage);
-            gameObject.SetActive(false);
-            _poolRef.Enqueue(this);
-            return;
+            _hitSmh = true;
+            _rigid2D.isKinematic = true;
+            _rigid2D.velocity = Vector2.zero;
+            _arrowAnim.SetBool("Is Landed", true);
+
+            // Check entity hit
+            LivingEntity hit = arg.VictimHit.gameObject.GetComponent<LivingEntity>();
+            if (hit != null)
+            {
+                hit.AddHealth(Damage);
+
+                // Knockback
+                if (hit.CurrentHealth > 0)
+                {
+                    Vector3 hitDir = (hit.transform.position - _collider.bounds.center).normalized;
+                    hit.AddForce(new Vector2(hitDir.x < 0 ? -20 : 20, Mathf.Abs(hitDir.y) * 2), ForceMode2D.Impulse);
+                }
+
+                // Check entity killed
+                else if (hit.CurrentHealth <= 0)
+                {
+                    if (WhoShot is PlayerEntity)
+                        ((PlayerEntity)WhoShot).EnemyKillCount++;
+
+                    EntityDeathEventArgs deathArg = new EntityDeathEventArgs(hit, WhoShot);
+                    EventHandler.CallEvent(deathArg);
+
+                    if (!deathArg.IsCancelled)
+                        gameObject.SetActive(false);
+                }
+
+                gameObject.SetActive(false);
+                _poolRef.Enqueue(this);
+                return;
+            }
         }
 
-        StartCoroutine(DestroyTimer());
+        if (gameObject.activeSelf)
+            StartCoroutine(DestroyTimer());
     }
 
     protected IEnumerator DestroyTimer()

@@ -4766,7 +4766,7 @@ GameObject:
   - component: {fileID: 5970392420568997728}
   - component: {fileID: 5970392420568997729}
   - component: {fileID: 5970392420568997730}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Chopstick Single
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4842,11 +4842,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _maxShootForce: 80
   _damage: 1
-  _type: 1
+  _type: 2
   _spriteRenderer: {fileID: 5970392421268378908}
   _ignoreHitLayer:
     serializedVersion: 2
     m_Bits: 1280
+  _simulateRotation: 1
   _who: {fileID: 0}
   _isLanded: 0
   _timerDestroy: 5
@@ -4866,7 +4867,7 @@ GameObject:
   - component: {fileID: 5970392421268378909}
   - component: {fileID: 5970392421268378908}
   - component: {fileID: 5970392421268378907}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}

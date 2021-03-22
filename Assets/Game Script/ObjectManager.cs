@@ -6,19 +6,31 @@ using NaughtyAttributes;
 
 public class ObjectManager : MonoBehaviour
 {
+    [System.Serializable]
+    private struct ArrowRarityPair
+    {
+        public string name;
+        public GameRarity rarity;
+        public ArrowTypes arrowType;
+    }
+
     public static ObjectManager _instance;
 
-    private static ArrowFactory _arrowFactory;
-    private static EnemyFactory _enemyFactory;
+    private ArrowFactory _arrowFactory;
+    private EnemyFactory _enemyFactory;
 
-    private static Dictionary<ArrowTypes, ArrowQuiverElement> _kindsOfArrow = new Dictionary<ArrowTypes, ArrowQuiverElement>();
+    private static Dictionary<GameRarity, List<ArrowTypes>> _rarities = new Dictionary<GameRarity, List<ArrowTypes>>();
+    private Dictionary<ArrowTypes, ArrowQuiverElement> _kindsOfArrow = new Dictionary<ArrowTypes, ArrowQuiverElement>();
+    private Dictionary<EnemyType, EnemyStructureElement> _kindsOfEnemy = new Dictionary<EnemyType, EnemyStructureElement>();
 
     [Header("Object Elements")]
     [SerializeField] private ArrowQuiverElement[] _arrows = null;
+    [SerializeField] private EnemyStructureElement[] _enemies = null;
+    [SerializeField] private ArrowRarityPair[] _rarityPairs = null;
 
     #region Properties
-    public static ArrowFactory ArrowMaker => _arrowFactory;
-    public static EnemyFactory EnemyMaker => _enemyFactory;
+    public ArrowFactory ArrowMaker => _arrowFactory;
+    public EnemyFactory EnemyMaker => _enemyFactory;
     #endregion
 
     #region Unity BuiltIn Methods
@@ -34,28 +46,74 @@ public class ObjectManager : MonoBehaviour
         else
         {
             _instance = this;
-            DontDestroyOnLoad(this);
+        }
+
+        // Init rarities in game
+        foreach (ArrowRarityPair pair in _rarityPairs)
+        {
+            List<ArrowTypes> t;
+            if (_rarities.TryGetValue(pair.rarity, out t))
+            {
+                if (!t.Contains(pair.arrowType))
+                    t.Add(pair.arrowType);
+            }
+            else
+            {
+                _rarities.Add(pair.rarity, new List<ArrowTypes>());
+                _rarities[pair.rarity].Add(pair.arrowType);
+            }
         }
 
         // Init objects to be pulled, in this case every kind of arrows
-        Dictionary<ArrowTypes, ArrowBehaviour> a = new Dictionary<ArrowTypes, ArrowBehaviour>();
+        Dictionary<ArrowTypes, ArrowBehaviour> arrows = new Dictionary<ArrowTypes, ArrowBehaviour>();
         foreach (ArrowQuiverElement e in _arrows)
         {
-            if (a.ContainsKey(e.Type))
+            if (arrows.ContainsKey(e.Type))
                 continue;
 
-            a.Add(e.Type, e.ItemPrefab);
+            arrows.Add(e.Type, e.ItemPrefab);
             _kindsOfArrow.Add(e.Type, e);
         }
+        _arrowFactory = new ArrowFactory(arrows, transform);
 
-        _arrowFactory = new ArrowFactory(a, transform);
+        Dictionary<EnemyType, EnemyEntity> enemies = new Dictionary<EnemyType, EnemyEntity>();
+        foreach (EnemyStructureElement e in _enemies)
+        {
+            if (enemies.ContainsKey(e.Type))
+                continue;
+
+            enemies.Add(e.Type, e.EnemyPrefab);
+            _kindsOfEnemy.Add(e.Type, e);
+        }
+        _enemyFactory = new EnemyFactory(enemies);
+    }
+
+    private void OnDestroy()
+    {
+        _instance = null;
     }
     #endregion
 
-    public static ArrowQuiverElement GetArrowElement(ArrowTypes type)
+    public static List<ArrowTypes> GetTypesByRarity(GameRarity rarity)
+    {
+        List<ArrowTypes> t;
+        if (_rarities.TryGetValue(rarity, out t))
+            return t;
+        return null;
+    }
+
+    public ArrowQuiverElement GetArrowElement(ArrowTypes type)
     {
         ArrowQuiverElement e;
         if (_kindsOfArrow.TryGetValue(type, out e))
+            return e;
+        return null;
+    }
+
+    public EnemyStructureElement GetEnemyElement(EnemyType type)
+    {
+        EnemyStructureElement e;
+        if (_kindsOfEnemy.TryGetValue(type, out e))
             return e;
         return null;
     }

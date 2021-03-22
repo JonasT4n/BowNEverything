@@ -45,7 +45,7 @@ public class ObjectFollower : MonoBehaviour
         if (_currentTargetPos.x != _targetLastPos.x || _currentTargetPos.y != _targetLastPos.y)
         {
             float moveX = (_currentTargetPos.x - _targetLastPos.x) * _followByX;
-            float moveY = (_currentTargetPos.x - _targetLastPos.y) * _followByY;
+            float moveY = (_currentTargetPos.y - _targetLastPos.y) * _followByY;
 
             _origin += new Vector3(moveX, moveY);
             transform.position = _origin;

@@ -4,7 +4,7 @@ using UnityEngine;
 using NaughtyAttributes;
 using System.Linq;
 
-public class ItemSpawner : MonoBehaviour, ISpawner
+public class ItemSpawner : MonoBehaviour, ISpawnerPost
 {
     [SerializeField] private FloatingItemBehaviour _prefab = null;
     [SerializeField] private Transform[] _spawnPoints = null;
@@ -105,8 +105,17 @@ public class ItemSpawner : MonoBehaviour, ISpawner
 
     private IElementInfo RandomInformation(FloatingItemBehaviour f)
     {
-        ArrowTypes t = (ArrowTypes)Random.Range(0, (int)System.Enum.GetValues(typeof(ArrowTypes)).Cast<ArrowTypes>().Max() + 1);
-        ArrowQuiverElement arrowElement = ObjectManager.GetArrowElement(t);
+        // TODO: Make all rarity exists
+        //GameRarity rarity = (GameRarity)Random.Range(0, (int)System.Enum.GetValues(typeof(GameRarity)).Cast<GameRarity>().Max() + 1);
+
+        GameRarity[] rarities = new GameRarity[4] { GameRarity.Trash, GameRarity.Common, GameRarity.Rare, GameRarity.Legendary };
+        List<ArrowTypes> t = ObjectManager.GetTypesByRarity(rarities[Random.Range(0, rarities.Length)]);
+
+        if (t == null)
+            return null;
+
+        int pickedInd = Random.Range(0, t.Count);
+        ArrowQuiverElement arrowElement = ObjectManager._instance.GetArrowElement(t[pickedInd]);
         if (arrowElement == null)
             return null;
 

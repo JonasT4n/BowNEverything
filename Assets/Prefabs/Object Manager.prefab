@@ -1,0 +1,137 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &825385292826174689
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 825385292826174688}
+  - component: {fileID: 825385292826174691}
+  m_Layer: 0
+  m_Name: Object Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &825385292826174688
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825385292826174689}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &825385292826174691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825385292826174689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1521464da5c216646ae5b09621a83563, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _arrows:
+  - _name: Normal
+    _type: 1
+    _rarity: 1
+    _prefab: {fileID: 1946734548294276899, guid: 3ddb8908dea2e7a408ca87d85cd20c8a,
+      type: 3}
+    _itemSprite: {fileID: -4346244404228752641, guid: b5fb9b604018874418e205e27d60e1a8,
+      type: 3}
+    _amountItemOnCollected: 1
+    _drawingTime: 0.5
+    _degreeAnticipation: -45
+  - _name: Chopstick
+    _type: 2
+    _rarity: 0
+    _prefab: {fileID: 5970392420568997730, guid: b754360dbdbbd53438b1fe81156a62c6,
+      type: 3}
+    _itemSprite: {fileID: -2041922617186583742, guid: 0f7f62b9cc772b4498d11787b6e32333,
+      type: 3}
+    _amountItemOnCollected: 2
+    _drawingTime: 0.5
+    _degreeAnticipation: -45
+  - _name: Dark Caster Caster
+    _type: -1
+    _rarity: -1
+    _prefab: {fileID: 5327841762986452181, guid: 71d321b93969a1f4fa9e14632f1137ba,
+      type: 3}
+    _itemSprite: {fileID: 21300000, guid: 2c4eac17ba8d39c46a7a59511006406a, type: 3}
+    _amountItemOnCollected: 0
+    _drawingTime: 0
+    _degreeAnticipation: 0
+  - _name: Mother Flip Flop
+    _type: 3
+    _rarity: 5
+    _prefab: {fileID: 4104058855207363018, guid: a952b264dd8cb8b4c8917f3983a777ea,
+      type: 3}
+    _itemSprite: {fileID: 116960349216224404, guid: 87d98cf21802b1d49a7f00f97a90bf9c,
+      type: 3}
+    _amountItemOnCollected: 1
+    _drawingTime: 1
+    _degreeAnticipation: -70
+  - _name: Ghost Arrow
+    _type: 4
+    _rarity: 3
+    _prefab: {fileID: 8953925739560408910, guid: 1ea2ed1e11ceab34eab5fd1226ccdce2,
+      type: 3}
+    _itemSprite: {fileID: -750226804544609895, guid: 485614720169d9b43b5ef5c5eb7e0148,
+      type: 3}
+    _amountItemOnCollected: 1
+    _drawingTime: 0.5
+    _degreeAnticipation: 135
+  - _name: Anvil
+    _type: 5
+    _rarity: 3
+    _prefab: {fileID: 7021642564447153481, guid: e79adc11bcff61449951e048ec1cbd3a,
+      type: 3}
+    _itemSprite: {fileID: 5382197054143347865, guid: dce12f02631a242478ec74bc80c230b0,
+      type: 3}
+    _amountItemOnCollected: 1
+    _drawingTime: 1.5
+    _degreeAnticipation: 0
+  _enemies:
+  - _name: Dark Caster
+    _type: 3
+    _prefab: {fileID: 5890279333089880094, guid: 73a1a429c089f5946b75b5af2838057b,
+      type: 3}
+  - _name: Grunt
+    _type: 1
+    _prefab: {fileID: 5126151518228154257, guid: b1eed2fe4b53c4e4e9adeec34090b255,
+      type: 3}
+  - _name: Dummy
+    _type: 0
+    _prefab: {fileID: 5126151518228154257, guid: b1eed2fe4b53c4e4e9adeec34090b255,
+      type: 3}
+  _rarityPairs:
+  - name: Normal
+    rarity: 1
+    arrowType: 1
+  - name: Dark Caster Ammo
+    rarity: -1
+    arrowType: -1
+  - name: Chop Stick
+    rarity: 0
+    arrowType: 2
+  - name: Mother Flip Flop
+    rarity: 5
+    arrowType: 3
+  - name: Ghost Arrow
+    rarity: 3
+    arrowType: 4
+  - name: Anvil
+    rarity: 3
+    arrowType: 5

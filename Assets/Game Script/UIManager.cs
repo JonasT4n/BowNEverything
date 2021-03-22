@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using NaughtyAttributes;
 
 public class UIManager : MonoBehaviour
@@ -10,6 +11,14 @@ public class UIManager : MonoBehaviour
     [Header("Menu & States")]
     [SerializeField] private RectTransform _gamePanel = null;
     [SerializeField] private RectTransform _pauseMenu = null;
+    [SerializeField] private RectTransform _gameOverMenu = null;
+
+    [Header("UI for Main Player Attributes")]
+    [SerializeField] private Image _mpCurrentUse = null;
+    [SerializeField] private Text _mpName = null;
+    [SerializeField] private Text _mpKillCount = null;
+
+    private Sprite _defaultArrowTypeNoneSprite;
 
     #region Unity BuiltIn Methods
     private void Awake()
@@ -28,8 +37,13 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        _defaultArrowTypeNoneSprite = _mpCurrentUse.sprite;
+
         // Subscribe events
         EventHandler.OnGamePauseEvent += GamePauseEvent;
+        EventHandler.OnPlayerChangeArrowEvent += ChangeArrowEvent;
+        EventHandler.OnEntityDeathEvent += WhenEntityDeath;
+        EventHandler.OnGameEndedEvent += GameOverEvent;
     }
 
     private void Update()
@@ -41,8 +55,13 @@ public class UIManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        _instance = null;
+
         // Unsubscribe events
         EventHandler.OnGamePauseEvent -= GamePauseEvent;
+        EventHandler.OnPlayerChangeArrowEvent -= ChangeArrowEvent;
+        EventHandler.OnEntityDeathEvent -= WhenEntityDeath;
+        EventHandler.OnGameEndedEvent -= GameOverEvent;
     }
     #endregion
 
@@ -51,6 +70,38 @@ public class UIManager : MonoBehaviour
     {
         _pauseMenu.gameObject.SetActive(args.IsPause);
         _gamePanel.gameObject.SetActive(!args.IsPause);
+    }
+
+    private void ChangeArrowEvent(PlayerChangeArrowEventArgs args)
+    {
+        if (args.Player.tag != "MainPlayer")
+            return;
+
+        ArrowQuiverElement e = ObjectManager._instance.GetArrowElement(args.ChangeTo);
+        _mpCurrentUse.sprite = e != null ? e.ItemSprite : _defaultArrowTypeNoneSprite;
+        _mpName.text = e != null ? e.Name : "Unknown";
+    }
+
+    private void WhenEntityDeath(EntityDeathEventArgs args)
+    {
+        if (args.WhoKill != null)
+        {
+            if (args.WhoKill.tag == "MainPlayer" && args.WhoKill is PlayerEntity)
+            {
+                PlayerEntity playerKillEntity = (PlayerEntity)args.WhoKill;
+                _mpKillCount.text = $"Enemy Killed: {playerKillEntity.EnemyKillCount}";
+            }
+
+            if (args.EntityVictim.tag == "MainPlayer" && args.EntityVictim is PlayerEntity && GameManager._instance.CurrentGameMode == GameModeState.SinglePlayer)
+                EventHandler.CallEvent(new GameEndedEventArgs());
+
+            args.EntityVictim.gameObject.SetActive(false);
+        }
+    }
+
+    private void GameOverEvent(GameEndedEventArgs args)
+    {
+        _gameOverMenu.gameObject.SetActive(true);
     }
     #endregion
 

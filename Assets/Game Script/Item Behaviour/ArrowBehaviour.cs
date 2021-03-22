@@ -14,7 +14,8 @@ public abstract class ArrowBehaviour : MonoBehaviour
 
     protected Queue<ArrowBehaviour> _poolRef;
 
-    [BoxGroup("ABSTRACT DEBUG"), SerializeField, ReadOnly] private PlayerEntity _who = null;
+    [BoxGroup("ABSTRACT DEBUG"), SerializeField] protected bool _simulateRotation = true;
+    [BoxGroup("ABSTRACT DEBUG"), SerializeField, ReadOnly] private LivingEntity _who = null;
     [BoxGroup("ABSTRACT DEBUG"), SerializeField, ReadOnly] private bool _isLanded = false;
 
     public Queue<ArrowBehaviour> PoolReference { set => _poolRef = value; }
@@ -22,7 +23,7 @@ public abstract class ArrowBehaviour : MonoBehaviour
     /// <summary>
     /// Who shoot this arrow.
     /// </summary>
-    public PlayerEntity Who
+    public LivingEntity WhoShot
     {
         set => _who = value;
         get => _who;

@@ -11,6 +11,11 @@ public class UIGameSceneManager : MonoBehaviour
     [SerializeField] private Slider _loadingBar = null;
     [SerializeField] private Text _loadingText = null;
 
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
+
     public void LoadScene(int sceneIndex)
     {
         StartCoroutine(LoadSceneAsync(sceneIndex));

@@ -208,6 +208,14 @@ public class InputHandler : MonoBehaviour
     [BoxGroup("DEBUG"), SerializeField] private bool _mobileControl = false;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private InputData _inputData = new InputData();
 
+    public static bool InputLocked
+    {
+        set
+        {
+            _inputLocked = value;
+            LocalInputData.ResetInput();
+        }
+    }
     public static bool IsMobileControl => _mobileCont;
     public static InputData LocalInputData => _localInputData;
 
@@ -235,6 +243,9 @@ public class InputHandler : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        if (_inputLocked)
+            return;
+
         if (_mobileControl)
             MobileControlHandler();
         else

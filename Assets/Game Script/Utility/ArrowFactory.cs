@@ -4,10 +4,13 @@ using UnityEngine;
 
 public enum ArrowTypes
 {
+    DarkCasterAmmo = -1,
     None = 0,
     Normal = 1,
-    ChopStick = 2
-    //Bounce = 2,
+    ChopStick = 2,
+    MotherFlipFlop = 3,
+    GhostArrow = 4,
+    Anvil = 5
     //Glue = 3,
     //IceBlade = 4,
     //Anvil = 5,
@@ -18,19 +21,21 @@ public enum ArrowTypes
 
 public enum GameRarity
 {
+    NonArrowUsable = -1,
     Trash = 0,
     Common = 1,
     Uncommon = 2,
-    Rare = 3
+    Rare = 3,
+    Epic = 4,
+    Legendary = 5
 }
 
 public class ArrowFactory : IFactoryWithPool<ArrowBehaviour, ArrowTypes>
 {
-    private const int MAX_EACH_POOL = 20;
+    private const int MAX_EACH_POOL = 60;
 
-    private Dictionary<ArrowTypes, ArrowBehaviour> _prefabs;
     private Transform _poolContainer;
-
+    private Dictionary<ArrowTypes, ArrowBehaviour> _prefabs;
     private Dictionary<ArrowTypes, Queue<ArrowBehaviour>> _pool = new Dictionary<ArrowTypes, Queue<ArrowBehaviour>>();
 
     public ArrowFactory(Dictionary<ArrowTypes, ArrowBehaviour> prefabs, Transform container = null)
@@ -74,22 +79,21 @@ public class ArrowFactory : IFactoryWithPool<ArrowBehaviour, ArrowTypes>
 
     public ArrowBehaviour GetObjectRequired(ArrowTypes type)
     {
-        Queue<ArrowBehaviour> pool = _pool[type];
-        if (pool == null)
-            return null;
+        Queue<ArrowBehaviour> pool;
+        if (_pool.TryGetValue(type, out pool))
+        {
+            if (pool.Count <= 0)
+                return null;
 
-        if (pool.Count <= 0)
-            return null;
-
-        ArrowBehaviour arr = pool.Dequeue();
-        arr.PoolReference = pool;
-        return arr;
+            ArrowBehaviour arr = pool.Dequeue();
+            arr.PoolReference = pool;
+            return arr;
+        }
+        return null;
     }
 
     public ArrowBehaviour CreateItem(ArrowTypes type, int amount)
     {
         throw new System.Exception("Not yet Implemented");
     }
-
-    
 }
