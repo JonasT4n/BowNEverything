@@ -12,16 +12,26 @@ public enum EntityEffects
 [RequireComponent(typeof(EntityUIInformation))]
 public abstract class LivingEntity : MonoBehaviour
 {
+    protected const float DETECT_RANGE = 0.01f;
+
     [Header("Living Entity Attributes")]
     [SerializeField] private int _maxHealth = 10;
     [SerializeField] private float _speed = 0.425f;
+    [SerializeField] private float _jumpForce = 0.75f;
+    [SerializeField] protected LayerMask _groundMask = ~0;
+    [SerializeField] protected LayerMask _wallMask = ~0;
+    [SerializeField] private Rigidbody2D _playerRigidbody = null;
     [SerializeField] private EntityUIInformation _uiInfoPlaceholder = null;
     [SerializeField] private AudioSource _soundMaker = null;
 
     [BoxGroup("ABSTRACT DEBUG"), SerializeField, ReadOnly] private int _currentHealth = 0;
     [BoxGroup("ABSTRACT DEBUG"), SerializeField, ReadOnly] private bool _isPaused = false;
-    [BoxGroup("ABSTRACT DEBUG"), SerializeField, ReadOnly] private Vector2 _moveDir = Vector2.zero;
 
+    public Rigidbody2D EntityR2D
+    {
+        protected set => _playerRigidbody = value;
+        get => _playerRigidbody;
+    }
     public EntityUIInformation InformationUI => _uiInfoPlaceholder;
     public AudioSource SoundMaker => _soundMaker;
 
@@ -42,14 +52,13 @@ public abstract class LivingEntity : MonoBehaviour
         get => _speed;
     }
 
-    public Vector2 CurrentVelocity 
-    { 
-        set => _moveDir = value; 
-        get => _moveDir; 
+    public float JumpForce
+    {
+        set => _jumpForce = value;
+        get => _jumpForce;
     }
 
     public abstract void AddHealth(int h);
-    public abstract void AddForce(Vector2 forceDir, ForceMode2D force);
     public abstract void AddEffects(EntityEffects effect, float value, bool temporary = true);
     public abstract void ResetEntityValues();
 

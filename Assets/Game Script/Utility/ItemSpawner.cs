@@ -39,7 +39,7 @@ public class ItemSpawner : MonoBehaviour, ISpawnerPost
     }
 
     // Update is called once per frame
-    private void Update()
+    private void FixedUpdate()
     {
         if (!_isPauseInSinglePlayer)
         {
@@ -64,8 +64,7 @@ public class ItemSpawner : MonoBehaviour, ISpawnerPost
 
     private void SpawnerPause(PauseGamePressEventArgs args)
     {
-        if (args.Mode != GameModeState.MultiPlayer)
-            _isPauseInSinglePlayer = args.IsPause;
+        _isPauseInSinglePlayer = args.IsPause;
     }
 
     public void Spawn()

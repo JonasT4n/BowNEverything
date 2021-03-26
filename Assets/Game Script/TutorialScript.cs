@@ -10,6 +10,7 @@ public class TutorialScript : MonoBehaviour
     [Header("Dialog Attributes")]
     [SerializeField] private RectTransform _tutorialDialogPanel = null;
     [SerializeField] private Text _textShow = null;
+    [SerializeField] private InputHandler _inputHandler = null;
     [SerializeField] private string[] _dialogText = null;
 
     [Space, Header("Hint Attributes")]
@@ -26,7 +27,7 @@ public class TutorialScript : MonoBehaviour
         ResetTutorial();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (IsPlayerReachFinishLine() && _isInTutorial)
         {
@@ -44,7 +45,7 @@ public class TutorialScript : MonoBehaviour
         {
             if (hit.collider.GetComponent<PlayerEntity>())
             {
-                hit.collider.GetComponent<PlayerEntity>().CurrentVelocity = Vector2.zero;
+                hit.collider.GetComponent<PlayerEntity>().EntityR2D.velocity = Vector2.zero;
                 return true;
             }
         }
@@ -68,7 +69,7 @@ public class TutorialScript : MonoBehaviour
     {
         OpenDialog(true);
         _hint.gameObject.SetActive(false);
-        InputHandler.InputLocked = true;
+        _inputHandler.InputLocked = true;
         while (_story.Count > 0)
         {
             string txtDialog = _story[0];
@@ -88,7 +89,7 @@ public class TutorialScript : MonoBehaviour
             }
         }
 
-        InputHandler.InputLocked = false;
+        _inputHandler.InputLocked = false;
         _hint.gameObject.SetActive(true);
         OpenDialog(false);
 

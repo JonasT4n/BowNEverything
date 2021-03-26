@@ -38,7 +38,7 @@ public class ArrowfiedAnvil : NormalArrow
 
                 // Knockback
                 if (hit.CurrentHealth > 0)
-                    hit.AddForce(new Vector2(Random.Range(0, 2) == 0 ? -100 : 100, 0), ForceMode2D.Impulse);
+                    hit.EntityR2D.AddForce(new Vector2(Random.Range(0, 2) == 0 ? -100 : 100, 0), ForceMode2D.Impulse);
 
                 // Check entity killed
                 else if (hit.CurrentHealth <= 0)

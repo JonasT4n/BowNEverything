@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 using NaughtyAttributes;
 
@@ -72,6 +72,8 @@ public class InputData
     [SerializeField] private bool _rollAmmoPressed;
 
     [SerializeField] private bool _pausePressed;
+
+    [SerializeField] private bool _enterPressed;
 
     [SerializeField] private Vector2 _aimPos;
 
@@ -159,6 +161,12 @@ public class InputData
         get => _pausePressed;
     }
 
+    public bool ReturnEnterPressed
+    {
+        set => _enterPressed = value;
+        get => _enterPressed;
+    }
+
     public Vector2 AimPosition
     {
         set => _aimPos = value;
@@ -187,13 +195,10 @@ public class InputData
     }
 }
 
-public class InputHandler : MonoBehaviour
+[RequireComponent(typeof(PlayerController2D))]
+public class InputHandler : MonoBehaviour, IInputHandler
 {
-    private static InputHandler _instance;
-
-    private static bool _mobileCont = false;
-    private static bool _inputLocked = false;
-    private static InputData _localInputData;
+    private bool _inputLocked = false;
 
     [Header("Input Attributes")]
     [SerializeField] private PCKeyMapControl _keyMap = new PCKeyMapControl() {
@@ -205,10 +210,15 @@ public class InputHandler : MonoBehaviour
         Pause = KeyCode.Escape
     };
 
-    [BoxGroup("DEBUG"), SerializeField] private bool _mobileControl = false;
+    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool _mobileControl = false;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private InputData _inputData = new InputData();
 
-    public static bool InputLocked
+    public bool UseMobileControl
+    {
+        set => _mobileControl = value;
+        get => _mobileControl;
+    }
+    public bool InputLocked
     {
         set
         {
@@ -216,31 +226,20 @@ public class InputHandler : MonoBehaviour
             LocalInputData.ResetInput();
         }
     }
-    public static bool IsMobileControl => _mobileCont;
-    public static InputData LocalInputData => _localInputData;
+    public bool IsLocalPlayer => true;
+    public InputData LocalInputData => _inputData;
 
     #region Unity BuiltIn Methods
     private void Awake()
     {
-        // Make it Singleton
-        if (_instance)
-        {
-            Debug.Log($"Deleted multiple object of singleton behaviour: {name}");
-            Destroy(this);
-            return;
-        }
-        else
-        {
-            _instance = this;
-            DontDestroyOnLoad(_instance);
-        }
-
         _inputData.ResetInput();
-        _localInputData = _inputData;
-        _mobileCont = _mobileControl;
     }
 
-    // Update is called once per frame
+    private void Start()
+    {
+        FindObjectOfType<CameraAutoController>().CenterHook = transform;
+    }
+
     private void Update()
     {
         if (_inputLocked)
@@ -295,13 +294,8 @@ public class InputHandler : MonoBehaviour
 
         _inputData.RollAmmoPressed = Input.GetKeyDown(_keyMap.RollAmmo);
         _inputData.PausePressed = Input.GetKeyDown(_keyMap.Pause);
+        _inputData.ReturnEnterPressed = Input.GetKeyDown(KeyCode.Return);
         _inputData.AimPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }
     #endregion
-
-    public static void LockInputer(bool locked)
-    {
-        _inputLocked = locked;
-        Debug.Log($"Input Locked: {locked}");
-    }
 }

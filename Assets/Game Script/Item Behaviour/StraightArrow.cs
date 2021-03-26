@@ -27,7 +27,7 @@ public class StraightArrow : ArrowBehaviour
     }
 
     // Update is called once per frame
-    private void Update()
+    private void FixedUpdate()
     {
         // Arrow still in the air
         if (!_hitSmh && !_freeze)
@@ -51,7 +51,7 @@ public class StraightArrow : ArrowBehaviour
     #region Event Methods
     private void ArrowFreezeOnSinglePlayer(PauseGamePressEventArgs args)
     {
-        if (!_hitSmh && GameManager._instance.CurrentGameMode != GameModeState.MultiPlayer)
+        if (!_hitSmh)
         {
             _freeze = args.IsPause;
             _moveDir = args.IsPause ? Vector2.zero : _velHolder;

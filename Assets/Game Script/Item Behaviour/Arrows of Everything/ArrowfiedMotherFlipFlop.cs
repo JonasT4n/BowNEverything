@@ -31,7 +31,7 @@ public class ArrowfiedMotherFlipFlop : NormalArrow, IBounceAble
                 if (hit.CurrentHealth > 0)
                 {
                     Vector3 hitDir = vel.normalized;
-                    hit.AddForce(new Vector2(hitDir.x < 0 ? -50 : 50, Mathf.Abs(hitDir.y) * 2), ForceMode2D.Impulse);
+                    hit.EntityR2D.AddForce(new Vector2(hitDir.x < 0 ? -50 : 50, Mathf.Abs(hitDir.y) * 2), ForceMode2D.Impulse);
                 }
 
                 // Check entity killed

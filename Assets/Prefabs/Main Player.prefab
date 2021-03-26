@@ -90,15 +90,17 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6055629510249214432}
+  - component: {fileID: 951289422300436859}
   - component: {fileID: 6055629510249214462}
   - component: {fileID: 6055629510249214435}
   - component: {fileID: 178711509502942465}
+  - component: {fileID: 1288486051298553257}
   - component: {fileID: 6055629510249214433}
   - component: {fileID: 6055629510249214434}
   - component: {fileID: 6055629510249214463}
   m_Layer: 12
   m_Name: Main Player
-  m_TagString: MainPlayer
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -119,6 +121,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &951289422300436859
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6055629510249214461}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0
+  m_GravityScale: 25
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!61 &6055629510249214462
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -260,6 +283,42 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1288486051298553257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6055629510249214461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1727b17f58f80a9409396b12f10a27c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _keyMap:
+    _left: 97
+    _right: 100
+    _jump: 32
+    _shoot: 323
+    _rollAmmo: 113
+    _pause: 27
+  _mobileControl: 0
+  _inputData:
+    _leftPressed: 0
+    _leftHold: 0
+    _leftRelease: 0
+    _rightPressed: 0
+    _rightHold: 0
+    _rightReleased: 0
+    _jumpPressed: 0
+    _jumpHold: 0
+    _jumpReleased: 0
+    _shootPressed: 0
+    _shootHold: 0
+    _shootReleased: 0
+    _rollAmmoPressed: 0
+    _pausePressed: 0
+    _aimPos: {x: 0, y: 0}
 --- !u!114 &6055629510249214433
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -272,19 +331,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a7fd8c7c2aadfc4b8d91e2547cb8fc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _groundMask:
-    serializedVersion: 2
-    m_Bits: 512
-  _wallMask:
-    serializedVersion: 2
-    m_Bits: 2048
-  _jumpForce: 1.08
-  _gravityWeight: 3
-  _aimPivot: {fileID: 6055629510297056429}
   _playerControlled: {fileID: 6055629510249214434}
-  _isGrounded: 0
   _drawingTimeHandler: 0
-  _aimDir: {x: 0, y: 0}
 --- !u!114 &6055629510249214434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,13 +346,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHealth: 10
-  _speed: 0.4
+  _speed: 40
+  _jumpForce: 100
+  _groundMask:
+    serializedVersion: 2
+    m_Bits: 512
+  _wallMask:
+    serializedVersion: 2
+    m_Bits: 2048
+  _playerRigidbody: {fileID: 951289422300436859}
   _uiInfoPlaceholder: {fileID: 6055629510249214463}
   _soundMaker: {fileID: 178711509502942465}
   _currentHealth: 0
   _isPaused: 0
-  _moveDir: {x: 0, y: 0}
   _username: Player
+  _aimPivot: {fileID: 6055629510297056429}
   _bowNeedle: {fileID: 6055629510970423659}
   _animator: {fileID: 6055629510249214435}
   _anticipatorRenderer: {fileID: 6055629511518532495}
@@ -338,7 +394,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _isGrounded: 0
   _enemyKilled: 0
+  _aimDir: {x: 0, y: 0}
   _haveArrows: 
 --- !u!114 &6055629510249214463
 MonoBehaviour:

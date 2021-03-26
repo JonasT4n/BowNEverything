@@ -6,7 +6,7 @@ using NaughtyAttributes;
 
 public class UIManager : MonoBehaviour
 {
-    public static UIManager _instance;
+    [SerializeField] private GameManager _gameManager = null;
 
     [Header("Menu & States")]
     [SerializeField] private RectTransform _gamePanel = null;
@@ -18,21 +18,15 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Text _mpName = null;
     [SerializeField] private Text _mpKillCount = null;
 
+    private InputHandler _inputHandler;
     private Sprite _defaultArrowTypeNoneSprite;
 
     #region Unity BuiltIn Methods
     private void Awake()
     {
-        // Make class singleton
-        if (_instance)
-        {
-            Debug.Log($"Deleted multiple object of singleton behaviour: {name}");
-            Destroy(this);
-        }
-        else
-        {
-            _instance = this;
-        }
+        _inputHandler = FindObjectOfType<InputHandler>();
+        if (_gameManager == null)
+            _gameManager = FindObjectOfType<GameManager>();
     }
 
     private void Start()
@@ -46,17 +40,15 @@ public class UIManager : MonoBehaviour
         EventHandler.OnGameEndedEvent += GameOverEvent;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         // Handle pause button pressed
-        if (InputHandler.LocalInputData.PausePressed)
+        if (_inputHandler.LocalInputData.PausePressed)
             PauseGame(!_pauseMenu.gameObject.activeSelf);
     }
 
     private void OnDestroy()
     {
-        _instance = null;
-
         // Unsubscribe events
         EventHandler.OnGamePauseEvent -= GamePauseEvent;
         EventHandler.OnPlayerChangeArrowEvent -= ChangeArrowEvent;
@@ -92,7 +84,7 @@ public class UIManager : MonoBehaviour
                 _mpKillCount.text = $"Enemy Killed: {playerKillEntity.EnemyKillCount}";
             }
 
-            if (args.EntityVictim.tag == "MainPlayer" && args.EntityVictim is PlayerEntity && GameManager._instance.CurrentGameMode == GameModeState.SinglePlayer)
+            if (args.EntityVictim.tag == "MainPlayer" && args.EntityVictim is PlayerEntity && _gameManager.Mode == SingleGameMode.SinglePlayer)
                 EventHandler.CallEvent(new GameEndedEventArgs());
 
             args.EntityVictim.gameObject.SetActive(false);
@@ -110,11 +102,8 @@ public class UIManager : MonoBehaviour
         if (_pauseMenu.gameObject.activeSelf == pause)
             return;
 
-        if (GameManager._instance != null)
-        {
-            PauseGamePressEventArgs arg = new PauseGamePressEventArgs(GameManager._instance.CurrentGameMode, pause);
-            EventHandler.CallEvent(arg);
-        }
+        PauseGamePressEventArgs arg = new PauseGamePressEventArgs(_gameManager.Mode, pause);
+        EventHandler.CallEvent(arg);
     }
 
     public RectTransform GetDefaultGamePanel()

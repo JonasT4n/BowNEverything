@@ -4,10 +4,11 @@ using UnityEngine;
 using UnityEngine.Events;
 using NaughtyAttributes;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class PlayerEntity : LivingEntity
 {
     [Header("Player Informations")]
-    [SerializeField] private string _username = "Player";
+    [SerializeField] private Transform _aimPivot = null;
     [SerializeField] private Transform _bowNeedle = null;
     [SerializeField] private Animator _animator = null;
     [SerializeField] private SpriteRenderer _anticipatorRenderer = null;
@@ -16,13 +17,32 @@ public class PlayerEntity : LivingEntity
     [SerializeField] private UnityEvent _pullArrowEvent = null;
     [SerializeField] private UnityEvent _releaseArrowEvent = null;
 
+    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool _isGrounded = false;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private int _enemyKilled = 0;
+    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private Vector2 _aimDir = Vector2.zero;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private List<ArrowTypes> _haveArrows = new List<ArrowTypes>();
 
-    private Dictionary<ArrowTypes, int> _quiver;
     private int _currentUse = -1;
+    private BoxCollider2D _collider;
+    private Dictionary<ArrowTypes, int> _quiver;
 
+    public bool IsGrounded => _isGrounded;
     public Animator PlayerAnim => _animator;
+    public Vector2 AimDirection
+    {
+        set
+        {
+            _aimDir = value;
+
+            float degreeAngle = Mathf.Atan(_aimDir.y / _aimDir.x) * Mathf.Rad2Deg;
+
+            if (_aimDir.x < 0)
+                degreeAngle += 180f;
+
+            _aimPivot.eulerAngles = new Vector3(0, 0, degreeAngle);
+        }
+        get => _aimDir;
+    }
     public ArrowTypes CurrentUse
     {
         get
@@ -46,18 +66,24 @@ public class PlayerEntity : LivingEntity
         EventHandler.OnPlayerCollectedItemEvent += FloatingItemCollected;
         EventHandler.OnPlayerChangeArrowEvent += PlayerChangeArrow;
 
-        if (tag == "MainPlayer")
-            FindObjectOfType<CameraAutoController>().CenterHook = transform;
-
         InformationUI.ShowUIFollower(true);
     }
 
     // Start is called before the first frame update
     private void Start()
     {
+        _collider = GetComponent<BoxCollider2D>();
+        if (EntityR2D == null)
+            EntityR2D = GetComponent<Rigidbody2D>();
+
         _quiver = new Dictionary<ArrowTypes, int>();
         InformationUI.MaxHealthValue = MaxHealth;
         ResetEntityValues();
+    }
+
+    private void Update()
+    {
+        _isGrounded = IsOnGround() == null ? false : true;
     }
 
     private void OnDisable()
@@ -112,20 +138,6 @@ public class PlayerEntity : LivingEntity
         InformationUI.HealthValue = CurrentHealth;
     }
 
-    public override void AddForce(Vector2 forceDir, ForceMode2D force)
-    {
-        switch (force)
-        {
-            case ForceMode2D.Force:
-                CurrentVelocity += forceDir * Time.deltaTime;
-                break;
-
-            case ForceMode2D.Impulse:
-                CurrentVelocity = forceDir;
-                break;
-        }
-    }
-
     public override void AddEffects(EntityEffects effect, float value, bool temporary = true)
     {
         if (temporary)
@@ -152,6 +164,72 @@ public class PlayerEntity : LivingEntity
         AddEffects(effect, negativeValue);
     }
     #endregion
+
+    private Collider2D IsOnGround()
+    {
+        // Get collider information
+        Vector3 centerCol = _collider.bounds.center, extentCol = _collider.size / 2;
+
+        // Condition
+        Vector2 boxSize = new Vector2(_collider.size.x, DETECT_RANGE);
+        Vector3 origin = centerCol - new Vector3(0, extentCol.y + boxSize.y, 0);
+        Collider2D hit = Physics2D.BoxCast(origin, boxSize, 0, Vector2.down, boxSize.y, _groundMask).collider;
+
+#if UNITY_EDITOR
+        // Debugger
+        Vector2 leftMostBound = new Vector2(centerCol.x - extentCol.x, centerCol.y - extentCol.y);
+        Vector2 rightMostBound = new Vector2(centerCol.x + extentCol.x, centerCol.y - extentCol.y);
+        float distance = Vector2.Distance(leftMostBound, rightMostBound);
+
+        Debug.DrawRay(leftMostBound, -new Vector2(0, DETECT_RANGE), Color.cyan);
+        Debug.DrawRay(rightMostBound, -new Vector2(0, DETECT_RANGE), Color.cyan);
+        Debug.DrawRay(leftMostBound, new Vector2(distance, 0), Color.cyan);
+        Debug.DrawRay(leftMostBound - new Vector2(0, DETECT_RANGE), new Vector2(distance, 0), Color.cyan);
+#endif
+
+        return hit;
+    }
+
+    private Collider2D HitCeilingCollider()
+    {
+        // Get collider information
+        Vector3 centerCol = _collider.bounds.center, extentCol = _collider.size / 2;
+
+        // Condition
+        Vector2 boxSize = new Vector2(_collider.size.x, Mathf.Abs(EntityR2D.velocity.y));
+        Vector3 origin = centerCol + new Vector3(0, extentCol.y + boxSize.y, 0);
+
+        return Physics2D.BoxCast(origin, boxSize, 0, Vector2.down, boxSize.y, _groundMask).collider;
+    }
+
+    private bool IsHitLeftWall()
+    {
+        // Get collider information
+        Vector3 centerCol = _collider.bounds.center, extentCol = _collider.size / 2;
+
+        // Condition
+        Vector2 boxSize = new Vector2(DETECT_RANGE, _collider.size.y);
+        Vector3 originLeft = centerCol - new Vector3(extentCol.x + boxSize.x, 0);
+
+        RaycastHit2D leftHit = Physics2D.BoxCast(originLeft, boxSize, 0, Vector2.left, boxSize.x, _wallMask);
+        Debug.Log(leftHit.collider);
+
+        return leftHit.collider != null ? true : false;
+    }
+
+    private bool IsHitRightWall()
+    {
+        // Get collider information
+        Vector3 centerCol = _collider.bounds.center, extentCol = _collider.size / 2;
+
+        // Condition
+        Vector2 boxSize = new Vector2(DETECT_RANGE, _collider.size.y);
+        Vector3 originRight = centerCol + new Vector3(extentCol.x + boxSize.x, 0);
+
+        RaycastHit2D rightHit = Physics2D.BoxCast(originRight, boxSize, 0, Vector2.right, boxSize.x, _wallMask);
+
+        return rightHit.collider != null ? true : false;
+    }
 
     public void BowShoot(Vector2 shootDir)
     {

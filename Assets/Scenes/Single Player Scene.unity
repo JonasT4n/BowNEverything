@@ -217,7 +217,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.5392604}
+  m_Offset: {x: 0, y: 0.40269613}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -228,7 +228,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 3.03125, y: 0.25778282}
+  m_Size: {x: 3.03125, y: 0.5309113}
   m_EdgeRadius: 0
 --- !u!1 &114933679
 GameObject:
@@ -532,7 +532,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1590402403}
-  m_RootOrder: 0
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &267406039
 MonoBehaviour:
@@ -660,7 +660,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1590402403}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &467918319
 MonoBehaviour:
@@ -674,6 +674,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce9e589b3fc205c47b0e5811dde8d0ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _gameManager: {fileID: 2006415173}
   _gamePanel: {fileID: 1728665043}
   _pauseMenu: {fileID: 2065885781}
   _gameOverMenu: {fileID: 1173050474}
@@ -725,7 +726,7 @@ PrefabInstance:
     - target: {fileID: 825385292826174688, guid: 36d63d9818ac1e4478bb18096ba55833,
         type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 825385292826174688, guid: 36d63d9818ac1e4478bb18096ba55833,
         type: 3}
@@ -970,73 +971,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 148.63577, y: 12.017586}
   m_EdgeRadius: 0
---- !u!1 &801636486
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 801636487}
-  - component: {fileID: 801636488}
-  m_Layer: 0
-  m_Name: Input Handler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &801636487
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 801636486}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &801636488
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 801636486}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1727b17f58f80a9409396b12f10a27c8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _keyMap:
-    _left: 97
-    _right: 100
-    _jump: 32
-    _shoot: 323
-    _rollAmmo: 113
-    _pause: 27
-  _mobileControl: 0
-  _inputData:
-    _leftPressed: 0
-    _leftHold: 0
-    _leftRelease: 0
-    _rightPressed: 0
-    _rightHold: 0
-    _rightReleased: 0
-    _jumpPressed: 0
-    _jumpHold: 0
-    _jumpReleased: 0
-    _shootPressed: 0
-    _shootHold: 0
-    _shootReleased: 0
-    _rollAmmoPressed: 0
-    _pausePressed: 0
-    _aimPos: {x: 0, y: 0}
 --- !u!1001 &805556394
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1275,7 +1209,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &971508118
 GameObject:
@@ -1306,7 +1240,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1590402403}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &971508120
 MonoBehaviour:
@@ -1367,7 +1301,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.5392604}
+  m_Offset: {x: 0, y: 0.41028303}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -1378,7 +1312,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 3.03125, y: 0.25778282}
+  m_Size: {x: 3.03125, y: 0.5157374}
   m_EdgeRadius: 0
 --- !u!212 &1069480389
 SpriteRenderer:
@@ -1988,7 +1922,7 @@ RectTransform:
   - {fileID: 1173050474}
   - {fileID: 1872461424}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2022,13 +1956,13 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 267406038}
   - {fileID: 2006415172}
   - {fileID: 467918318}
   - {fileID: 971508119}
   - {fileID: 1644183056}
+  - {fileID: 267406038}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1644183055
 GameObject:
@@ -2059,7 +1993,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1590402403}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1644183057
 MonoBehaviour:
@@ -2073,6 +2007,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f26b3a21a1e9cf489437142818a322e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _gameManager: {fileID: 2006415173}
   _spawnPoints:
   - {fileID: 1438972730}
   _enemySpawnPoints:
@@ -2128,7 +2063,7 @@ Transform:
   - {fileID: 1837953911}
   - {fileID: 1148862733}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1720084029
 GameObject:
@@ -2767,7 +2702,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1590402403}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2006415173
 MonoBehaviour:
@@ -2781,7 +2716,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 598320b1564320842bf34c976738b8f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _defaultRespawnTime: 3
   _gameMode: 2
   _mainPlayerPrefab: {fileID: 6055629510249214434, guid: 9525d90bea952e14080e80d2068adcf3,
     type: 3}
@@ -3032,7 +2966,7 @@ PrefabInstance:
     - target: {fileID: 2655616794960176438, guid: 019395a51634af24d813500e3875f9a9,
         type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2655616794960176438, guid: 019395a51634af24d813500e3875f9a9,
         type: 3}

@@ -36,7 +36,7 @@ public class NormalArrow : ArrowBehaviour
         EventHandler.OnPlayerShootEvent += ArrowBeingShoot;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         // Arrow still in the air
         if (!_hitSmh && !_freeze)
@@ -80,7 +80,7 @@ public class NormalArrow : ArrowBehaviour
     #region Event Methods
     private void ArrowFreezeOnSinglePlayer(PauseGamePressEventArgs args)
     {
-        if (!_hitSmh && GameManager._instance.CurrentGameMode != GameModeState.MultiPlayer)
+        if (!_hitSmh)
         {
             _freeze = args.IsPause;
             _rigid2D.isKinematic = args.IsPause;
@@ -146,7 +146,7 @@ public class NormalArrow : ArrowBehaviour
                 if (hit.CurrentHealth > 0)
                 {
                     Vector3 hitDir = (hit.transform.position - _collider.bounds.center).normalized;
-                    hit.AddForce(new Vector2(hitDir.x < 0 ? -20 : 20, Mathf.Abs(hitDir.y) * 2), ForceMode2D.Impulse);
+                    hit.EntityR2D.AddForce(new Vector2(hitDir.x < 0 ? -20 : 20, Mathf.Abs(hitDir.y) * 2), ForceMode2D.Impulse);
                 }
 
                 // Check entity killed

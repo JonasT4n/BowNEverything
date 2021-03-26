@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5126151518228154263}
   - component: {fileID: 5126151518228154260}
+  - component: {fileID: 6261413965400139222}
   - component: {fileID: 5126151518228154261}
   - component: {fileID: 5126151518228154259}
   - component: {fileID: 5126151518228154256}
@@ -86,6 +87,27 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!50 &6261413965400139222
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5126151518228154250}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0
+  m_GravityScale: 25
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!61 &5126151518228154261
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -226,8 +248,6 @@ MonoBehaviour:
   _wallMask:
     serializedVersion: 2
     m_Bits: 2048
-  _jumpForce: 0.75
-  _gravityWeight: 2
   _collider: {fileID: 5126151518228154261}
   _enemyDetectMask:
     serializedVersion: 2
@@ -251,12 +271,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHealth: 10
-  _speed: 0.275
+  _speed: 25
+  _jumpForce: 100
+  _playerRigidbody: {fileID: 6261413965400139222}
   _uiInfoPlaceholder: {fileID: 5126151518228154262}
   _soundMaker: {fileID: 5126151518228154259}
   _currentHealth: 0
   _isPaused: 0
-  _moveDir: {x: 0, y: 0}
   _type: 0
 --- !u!114 &5126151518228154262
 MonoBehaviour:

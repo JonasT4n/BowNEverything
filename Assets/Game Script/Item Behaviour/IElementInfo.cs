@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
-public interface IElementInfo : System.IDisposable
+public interface IElementInfo : IDisposable
 {
 
 }

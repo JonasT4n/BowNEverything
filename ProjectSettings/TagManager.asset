@@ -5,7 +5,6 @@ TagManager:
   serializedVersion: 2
   tags:
   - Platform
-  - MainPlayer
   layers:
   - Default
   - TransparentFX
@@ -20,7 +19,7 @@ TagManager:
   - Floating Item
   - Wall
   - Entities
-  - 
+  - Anti Ground
   - 
   - 
   - 

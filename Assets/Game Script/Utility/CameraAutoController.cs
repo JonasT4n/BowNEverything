@@ -45,7 +45,7 @@ public class CameraAutoController : MonoBehaviour
     }
 
     // Update is called once per frame
-    private void Update()
+    private void FixedUpdate()
     {
         CalculatePivot();
         MoveCameraHandler();
@@ -58,16 +58,26 @@ public class CameraAutoController : MonoBehaviour
     private void CalculatePivot()
     {
         if (_centerHook != null)
-            _centerFollowPoint = _centerHook.position;
-        else
-            _centerFollowPoint = Vector2.zero;
-
-        for (int i = 0; i < _targets.Count; i++)
         {
-            Vector3 targetPos = _targets[i].position;
-            _centerFollowPoint = (_centerFollowPoint + new Vector2(targetPos.x, targetPos.y)) / 2;
-        }
+            _centerFollowPoint = _centerHook.position;
 
+            for (int i = 0; i < _targets.Count; i++)
+            {
+                if (_targets[i] == null)
+                {
+                    _targets.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+
+                Vector3 targetPos = _targets[i].position;
+                _centerFollowPoint = (_centerFollowPoint + new Vector2(targetPos.x, targetPos.y)) / 2;
+            }
+        }
+        else
+        {
+            _centerFollowPoint = Vector2.zero;
+        }
     }
 
     private void MoveCameraHandler()

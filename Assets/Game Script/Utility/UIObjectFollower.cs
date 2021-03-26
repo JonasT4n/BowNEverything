@@ -22,7 +22,7 @@ public class UIObjectFollower : ObjectFollower
         _rectTransform = GetComponent<RectTransform>();
     }
 
-    protected override void Update()
+    protected override void FixedUpdate()
     {
         if (TargetFollow != null)
         {

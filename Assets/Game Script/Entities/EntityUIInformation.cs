@@ -48,7 +48,13 @@ public class EntityUIInformation : MonoBehaviour
     {
         _entity = GetComponent<LivingEntity>();
         if (_gui == null)
-            _gui = UIManager._instance.GetDefaultGamePanel();
+        {
+            if (FindObjectOfType<UIManager>() != null)
+                _gui = FindObjectOfType<UIManager>().GetDefaultGamePanel();
+            else if (FindObjectOfType<OnlineGameManager>() != null)
+                _gui = FindObjectOfType<OnlineGameManager>().GetDefaultGamePanel();
+        }
+            
         _uiFollowerPrefab.TargetFollow = _entity.transform;
 
         // Set placeholders from static prefab, check indexes in the follower prefab

@@ -5,16 +5,19 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Main Menu.unity
     guid: 035855b4a80c50f4f99dfed44120ef7c
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Tutorial Scene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Single Player Scene.unity
     guid: ea2157dd97277b64e935704ce91cea7f
   - enabled: 0
     path: Assets/Scenes/Multiplayer Scene.unity
     guid: 487908a765bac3f45bb6fc597ffcdc18
+  - enabled: 1
+    path: Assets/Scenes/Testing Mirror.unity
+    guid: e573861e4f6f03c40b72d640bc131283
   m_configObjects: {}

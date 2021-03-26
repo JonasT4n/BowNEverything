@@ -8,7 +8,8 @@ public class EntitySpawner : MonoBehaviour, ISpawnerPost
 {
     private const float SAFE_DISTANCE = 5f;
 
-    [Header("Spawner Attributes")]
+    [Header("Spawner Requirements")]
+    [SerializeField] private GameManager _gameManager = null;
     [SerializeField] private Transform[] _spawnPoints = null;
     [SerializeField] private Transform[] _enemySpawnPoints = null;
     [SerializeField] private Vector2 _offsetPos = Vector2.zero;
@@ -31,7 +32,7 @@ public class EntitySpawner : MonoBehaviour, ISpawnerPost
     }
 
     // Update is called once per frame
-    private void Update()
+    private void FixedUpdate()
     {
         if (!_isPauseInSinglePlayer)
         {
@@ -42,7 +43,7 @@ public class EntitySpawner : MonoBehaviour, ISpawnerPost
             else
             {
                 _secIntHandler = _secondsInterval;
-                if (GameManager._instance.CurrentGameMode != GameModeState.Tutorial && GameManager._instance.CurrentGameMode != GameModeState.None)
+                if (_gameManager.Mode != SingleGameMode.Tutorial && _gameManager.Mode != SingleGameMode.None)
                     Spawn();
             }
         }
@@ -57,22 +58,22 @@ public class EntitySpawner : MonoBehaviour, ISpawnerPost
 
     private void SpawnerPause(PauseGamePressEventArgs args)
     {
-        if (args.Mode != GameModeState.MultiPlayer)
-            _isPauseInSinglePlayer = args.IsPause;
+        _isPauseInSinglePlayer = args.IsPause;
     }
 
     public void Spawn()
     {
         Transform point = null;
         EnemyType enemyTypeSpawned = EnemyType.Grunts;
-        switch (GameManager._instance.CurrentGameMode)
+
+        switch (_gameManager.Mode)
         {
-            case GameModeState.Tutorial:
+            case SingleGameMode.Tutorial:
                 point = _enemySpawnPoints[0];
                 enemyTypeSpawned = EnemyType.Dummy;
                 break;
 
-            case GameModeState.SinglePlayer:
+            case SingleGameMode.SinglePlayer:
                 point = RandomPointPicker(_enemySpawnPoints);
                 enemyTypeSpawned = RandomEnemySpawnType();
                 break;
@@ -93,13 +94,14 @@ public class EntitySpawner : MonoBehaviour, ISpawnerPost
     public void RespawnPlayer(PlayerEntity ent)
     {
         Transform safePointSpawn = null;
-        switch (GameManager._instance.CurrentGameMode)
+
+        switch (_gameManager.Mode)
         {
-            case GameModeState.Tutorial:
+            case SingleGameMode.Tutorial:
                 safePointSpawn = _spawnPoints[0];
                 break;
 
-            case GameModeState.SinglePlayer:
+            case SingleGameMode.SinglePlayer:
                 safePointSpawn = RandomPointPicker(_spawnPoints);
                 break;
         }

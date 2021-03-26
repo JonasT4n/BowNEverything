@@ -36,20 +36,6 @@ public class EnemyEntity : LivingEntity
         InformationUI.HealthValue = CurrentHealth;
     }
 
-    public override void AddForce(Vector2 forceDir, ForceMode2D force)
-    {
-        switch (force)
-        {
-            case ForceMode2D.Force:
-                CurrentVelocity += forceDir * Time.deltaTime;
-                break;
-
-            case ForceMode2D.Impulse:
-                CurrentVelocity = forceDir;
-                break;
-        }
-    }
-
     public override void AddEffects(EntityEffects effect, float value, bool temporary = true)
     {
         if (temporary)

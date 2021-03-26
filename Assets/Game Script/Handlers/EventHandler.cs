@@ -9,6 +9,12 @@ public interface IGameEventArgs
 
 public static class EventHandler
 {
+    // Technical Events
+    public delegate void WindowResize(Vector2Int prevSize, Vector2Int newSize);
+
+    public static event WindowResize OnWindowResizeEvent;
+
+    // In Game Events
     public delegate void ArrowHitVictim(ArrowHitEventArgs args);
     public delegate void GameStarted(GameStartedEventArgs args);
     public delegate void GameEnded(GameEndedEventArgs args);
@@ -18,6 +24,7 @@ public static class EventHandler
     public delegate void PlayerChangeArrow(PlayerChangeArrowEventArgs args);
     public delegate void EntityDeath(EntityDeathEventArgs args);
     public delegate void PlayerRespawn(PlayerRespawnEventArgs args);
+    
 
     public static event ArrowHitVictim OnArrowHitEvent;
     public static event GameStarted OnGameStartedEvent;
@@ -28,6 +35,11 @@ public static class EventHandler
     public static event PlayerChangeArrow OnPlayerChangeArrowEvent;
     public static event EntityDeath OnEntityDeathEvent;
     public static event PlayerRespawn OnPlayerRespawnEvent;
+
+    public static void CallWindowResizeEvent(Vector2Int prevSize, Vector2Int newSize)
+    {
+        OnWindowResizeEvent?.Invoke(prevSize, newSize);
+    }
 
     public static void CallEvent(IGameEventArgs ev)
     {
@@ -150,13 +162,13 @@ public class PlayerCollectItemEventArgs : IGameEventArgs
 
 public class PauseGamePressEventArgs : IGameEventArgs
 {
-    private GameModeState _mode;
+    private SingleGameMode _mode;
     private bool _isPause;
 
-    public GameModeState Mode => _mode;
+    public SingleGameMode Mode => _mode;
     public bool IsPause => _isPause;
 
-    public PauseGamePressEventArgs(GameModeState mode, bool pause)
+    public PauseGamePressEventArgs(SingleGameMode mode, bool pause)
     {
         _mode = mode;
         _isPause = pause;

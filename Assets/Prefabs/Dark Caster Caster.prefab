@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1588251459}
   - component: {fileID: 1588251461}
   - component: {fileID: 1588251460}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: Particle System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4764,7 +4764,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6014272830174236408}
   - component: {fileID: 8158102301312036726}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4848,7 +4848,7 @@ GameObject:
   - component: {fileID: 5327841762986452182}
   - component: {fileID: 5327841762986452183}
   - component: {fileID: 5327841762986452181}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: Dark Caster Caster
   m_TagString: Untagged
   m_Icon: {fileID: 0}
