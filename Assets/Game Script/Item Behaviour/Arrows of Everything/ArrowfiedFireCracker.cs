@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ArrowfiedFireCracker : NormalArrow
+namespace BNEGame
 {
-    
+    public class ArrowfiedFireCracker : NormalArrow
+    {
+
+    }
+
 }

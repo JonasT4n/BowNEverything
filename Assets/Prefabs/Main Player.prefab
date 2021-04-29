@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 1894943619493119745}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6055629510249214432}
   m_RootOrder: 0
@@ -113,7 +113,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6055629510249214461}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.23, y: -1.4, z: 0}
+  m_LocalPosition: {x: -7, y: -1.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6638979100177734810}
@@ -136,7 +136,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0
-  m_GravityScale: 25
+  m_GravityScale: 5
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -155,7 +155,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.18585598, y: -0.19115806}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -166,7 +166,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2.8970163, y: 6.408171}
+  m_Size: {x: 0.5771184, y: 1.2620516}
   m_EdgeRadius: 0
 --- !u!95 &6055629510249214435
 Animator:
@@ -318,6 +318,7 @@ MonoBehaviour:
     _shootReleased: 0
     _rollAmmoPressed: 0
     _pausePressed: 0
+    _enterPressed: 0
     _aimPos: {x: 0, y: 0}
 --- !u!114 &6055629510249214433
 MonoBehaviour:
@@ -332,6 +333,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerControlled: {fileID: 6055629510249214434}
+  _inputData:
+    _leftPressed: 0
+    _leftHold: 0
+    _leftRelease: 0
+    _rightPressed: 0
+    _rightHold: 0
+    _rightReleased: 0
+    _jumpPressed: 0
+    _jumpHold: 0
+    _jumpReleased: 0
+    _shootPressed: 0
+    _shootHold: 0
+    _shootReleased: 0
+    _rollAmmoPressed: 0
+    _pausePressed: 0
+    _enterPressed: 0
+    _aimPos: {x: 0, y: 0}
   _drawingTimeHandler: 0
 --- !u!114 &6055629510249214434
 MonoBehaviour:
@@ -346,58 +364,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHealth: 10
-  _speed: 40
-  _jumpForce: 100
+  _speed: 8.75
+  _jumpForce: 20
   _groundMask:
     serializedVersion: 2
     m_Bits: 512
-  _wallMask:
+  _nonWallMask:
     serializedVersion: 2
-    m_Bits: 2048
+    m_Bits: 21764
   _playerRigidbody: {fileID: 951289422300436859}
   _uiInfoPlaceholder: {fileID: 6055629510249214463}
-  _soundMaker: {fileID: 178711509502942465}
   _currentHealth: 0
   _isPaused: 0
-  _username: Player
+  _friction: 1.05
   _aimPivot: {fileID: 6055629510297056429}
   _bowNeedle: {fileID: 6055629510970423659}
   _animator: {fileID: 6055629510249214435}
   _anticipatorRenderer: {fileID: 6055629511518532495}
-  _pullArrowEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 178711509502942465}
-        m_MethodName: PlayOneShot
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 8300000, guid: ebc0aa16278b3184da92b66d41519d22,
-            type: 3}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.AudioClip, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  _releaseArrowEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 178711509502942465}
-        m_MethodName: PlayOneShot
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 8300000, guid: 121654f344ea54c4d8d778bb448e108a,
-            type: 3}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.AudioClip, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  _floatingItemMask:
+    serializedVersion: 2
+    m_Bits: 1024
   _isGrounded: 0
+  _isHitLeftWall: 0
+  _isHitRightWall: 0
+  _isHitCeiling: 0
   _enemyKilled: 0
   _aimDir: {x: 0, y: 0}
-  _haveArrows: 
+  _quiver: []
 --- !u!114 &6055629510249214463
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -441,7 +434,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6055629510297056428}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.41, y: 0.35, z: 0}
+  m_LocalPosition: {x: -0.113, y: 0.002, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6055629511433658367}
@@ -477,8 +470,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6055629510544705262}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 1.5, y: 0.05, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalPosition: {x: 0.486, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6055629510297056429}
   m_RootOrder: 2
@@ -558,8 +551,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6055629510672285380}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 0.81, y: 0.01, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalPosition: {x: 0.338, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6055629510297056429}
   m_RootOrder: 3
@@ -720,7 +713,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6055629511433658366}
   m_LocalRotation: {x: 0, y: 0, z: -0.38268343, w: 0.92387956}
-  m_LocalPosition: {x: 1.63, y: 0.08, z: 0}
+  m_LocalPosition: {x: 0.465, y: -0.005, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6055629510297056429}
@@ -801,8 +794,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6055629511518532493}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.79, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.5, y: 0, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_Children: []
   m_Father: {fileID: 6055629510297056429}
   m_RootOrder: 1
@@ -851,7 +844,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.86836743, y: 2.2382812}
+  m_Size: {x: 1.1914062, y: 1.1914062}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0

@@ -38,41 +38,39 @@ public class FloatingItemBehaviour : MonoBehaviour
     [Header("Floating Attributes")]
     [SerializeField] private SpriteRenderer _renderer = null;
     [SerializeField] private BoxCollider2D _collider = null;
-    [SerializeField] private Animator _animator = null;
-    [SerializeField] private LayerMask _collectAbleBy = ~0;
 
-    private IElementInfo _itemInfo = null;
+    private IElementItemInfo _itemInfo = null;
 
+    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private int _onCollectionIndex;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private Sprite _sprite = null;
     [BoxGroup("DEBUG"), SerializeField, ReadOnly] private Vector3 _origin;
 
-    public Sprite RenderSprite
+    public IElementItemInfo ItemInfo
     {
-        set => _sprite = value;
-        get => _sprite;
+        set
+        {
+            _itemInfo = value;
+            _sprite = _itemInfo.ItemSprite;
+        }
+        get => _itemInfo;
     }
 
-    public IElementInfo ItemInfo
+    public int OnCollectionIndex
     {
-        set => _itemInfo = value;
-        get => _itemInfo;
+        set => _onCollectionIndex = value;
+        get => _onCollectionIndex;
     }
 
     #region Unity BuiltIn Methods
     private void OnEnable()
     {
-        //_currentTimeHandler = 0f;
-        _origin = transform.position;
-
         if (_sprite != null)
             _renderer.sprite = _sprite;
     }
 
-    // Update is called once per frame
-    private void FixedUpdate()
+    private void Start()
     {
-        // Handler method called
-        HandleCollision();
+        _origin = transform.position;
     }
 
     private void OnDisable()
@@ -84,21 +82,4 @@ public class FloatingItemBehaviour : MonoBehaviour
         }
     }
     #endregion
-
-    private void HandleCollision()
-    {
-        Vector2 origin = _collider.bounds.center;
-        Vector2 size = _collider.size;
-        RaycastHit2D hit = Physics2D.BoxCast(origin, size, 0, Vector2.zero, 0, _collectAbleBy);
-
-        if (hit.collider != null)
-        {
-            GameObject obj = hit.collider.gameObject;
-            if (obj.GetComponent<PlayerEntity>())
-            {
-                PlayerCollectItemEventArgs arg = new PlayerCollectItemEventArgs(obj.GetComponent<PlayerEntity>(), this);
-                EventHandler.CallEvent(arg);
-            }
-        }
-    }
 }

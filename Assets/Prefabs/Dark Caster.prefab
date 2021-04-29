@@ -31,7 +31,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5890279333089880089}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 34.3, y: -0.8, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -121,18 +121,18 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.6570835, y: 0.01725626}
+  m_Offset: {x: -0.06904708, y: 0.005357504}
   m_SpriteTilingProperty:
-    border: {x: 1.40625, y: 0.9375, z: 2.96875, w: 0.46875}
+    border: {x: 0.20833333, y: 0.1388889, z: 0.4398148, w: 0.06944445}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 10, y: 10}
+    oldSize: {x: 1.4814814, y: 1.4814814}
     newSize: {x: 5.9811387, y: 7.29}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 3.4301186, y: 7.228879}
+  m_Size: {x: 0.45510784, y: 0.94714916}
   m_EdgeRadius: 0
 --- !u!82 &5890279333089880082
 AudioSource:
@@ -273,9 +273,14 @@ MonoBehaviour:
   _maxHealth: 5
   _speed: 10
   _jumpForce: 0
+  _groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _nonWallMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   _playerRigidbody: {fileID: 4359052409257774583}
   _uiInfoPlaceholder: {fileID: 5890279333089880093}
-  _soundMaker: {fileID: 5890279333089880082}
   _currentHealth: 0
   _isPaused: 0
   _type: 3

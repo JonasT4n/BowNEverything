@@ -5,126 +5,156 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using NaughtyAttributes;
 
-public class TutorialScript : MonoBehaviour
+namespace BNEGame
 {
-    [Header("Dialog Attributes")]
-    [SerializeField] private RectTransform _tutorialDialogPanel = null;
-    [SerializeField] private Text _textShow = null;
-    [SerializeField] private InputHandler _inputHandler = null;
-    [SerializeField] private string[] _dialogText = null;
-
-    [Space, Header("Hint Attributes")]
-    [SerializeField] private Text _hint = null;
-    [SerializeField] private BoxCollider2D _finishLine = null;
-
-    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private List<string> _story = new List<string>();
-    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool _isDialogLineFinish = false;
-    [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool _isInTutorial = true;
-
-    #region Unity BuiltIn Methods
-    private void Awake()
+    public class TutorialScript : MonoBehaviour, IReceiveInteration
     {
-        ResetTutorial();
-    }
+        [Header("Dialog Attributes")]
+        [SerializeField] private RectTransform tutorDialogPanel = null;
+        [SerializeField] private ItemSpawnerManager itemSpawner = null;
+        [SerializeField] private UIGameSceneManager sceneManager = null;
+        [SerializeField] private Text tutorTextDisplay = null;
 
-    private void FixedUpdate()
-    {
-        if (IsPlayerReachFinishLine() && _isInTutorial)
+        private IEnumerator dialogRoutine;
+        private InputHandler inputHandler;
+
+        [BoxGroup("DEBUG"), SerializeField, ReadOnly] private List<string> texts = new List<string>();
+        [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool isDialogFinish = false;
+        [BoxGroup("DEBUG"), SerializeField, ReadOnly] private bool isDoingTutorial = true;
+
+        #region Unity BuiltIn Methods
+        private void Start()
         {
-            _isInTutorial = false;
-            _story.Add("Congratulation, you have passed the tutorial.");
-            StartCoroutine(GamePrologue());
+            inputHandler = FindObjectOfType<InputHandler>();
+            itemSpawner.SetRunning(true);
+            isDoingTutorial = true;
+            ResetTutorial();
         }
-    }
-    #endregion
+        #endregion
 
-    private bool IsPlayerReachFinishLine()
-    {
-        RaycastHit2D hit = Physics2D.BoxCast(_finishLine.bounds.center, _finishLine.size, 0, Vector2.down, 0);
-        if (hit.collider != null)
+        public void InvokeInteraction(string codeId)
         {
-            if (hit.collider.GetComponent<PlayerEntity>())
+            if (dialogRoutine != null)
+                return;
+
+            switch (codeId)
             {
-                hit.collider.GetComponent<PlayerEntity>().EntityR2D.velocity = Vector2.zero;
-                return true;
+                case "Movement101":
+                    texts.AddRange(new string[] {
+                    "Press A or D to move left or right."
+                });
+                    break;
+
+                case "FinishLine101":
+                    texts.AddRange(new string[] {
+                    "Congratulation, you have reached the Finish Line!"
+                });
+                    isDoingTutorial = false;
+                    break;
+
+                case "JumpTutor101":
+                    texts.AddRange(new string[] {
+                    "Press Space to jump over the platform and cliffs.",
+                    "Try jump over that cliff."
+                });
+                    break;
+
+                case "CollectArrows101":
+                    texts.AddRange(new string[] {
+                    "Arrow-like items will be spawned in this tree of life.",
+                    "Collect them all, fill up your quiver, you can only collect 2 for each arrow-like things",
+                    "The arrow-like thing that you are currently use is on under right corner of your screen."
+                });
+                    break;
+
+                case "ShootArrow101":
+                    texts.AddRange(new string[] {
+                    "To shoot an arrow, hold left click mouse button.",
+                    "Wait until the drawing gauge is filled under your HP bar",
+                    "Release left mouse button after it is filled",
+                    "There's other note, change current use to other arrow-like you can press Q."
+                });
+                    break;
+
+                case "Enemies101":
+                    texts.AddRange(new string[] {
+                    "Now shoot those enemies in front of you!",
+                    "They always spawn on the dark altar, so be careful."
+                });
+                    break;
+
+                default:
+                    return;
             }
+
+            dialogRoutine = GameDialogBegin();
+            StartCoroutine(dialogRoutine);
         }
 
-        return false;
-    }
-
-    public void OpenDialog(bool active)
-    {
-        _tutorialDialogPanel.gameObject.SetActive(active);
-    }
-
-    public void ResetTutorial()
-    {
-        _story.Clear();
-        _story.AddRange(_dialogText);
-        StartCoroutine(GamePrologue());
-    }
-
-    private IEnumerator GamePrologue()
-    {
-        OpenDialog(true);
-        _hint.gameObject.SetActive(false);
-        _inputHandler.InputLocked = true;
-        while (_story.Count > 0)
+        public void OpenDialog(bool active)
         {
-            string txtDialog = _story[0];
-            _isDialogLineFinish = false;
-            _story.RemoveAt(0);
+            tutorDialogPanel.gameObject.SetActive(active);
+        }
 
-            StartCoroutine(DialogAnimation(txtDialog));
+        public void ResetTutorial()
+        {
+            texts.Clear();
+            InvokeInteraction("Movement101");
+        }
 
-            bool hitNextLine = false;
-            while (!_isDialogLineFinish && !hitNextLine)
+        private IEnumerator GameDialogBegin()
+        {
+            OpenDialog(true);
+            inputHandler.InputLocked = true;
+            while (texts.Count > 0)
             {
-                yield return null;
-                hitNextLine = Input.touchCount > 0 || Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1);
+                string txtDialog = texts[0];
+                isDialogFinish = false;
+                texts.RemoveAt(0);
 
-                if (hitNextLine && !_isDialogLineFinish)
-                    hitNextLine = false;
+                StartCoroutine(DialogAnimation(txtDialog));
+
+                bool hitNextLine = false;
+                while (!isDialogFinish && !hitNextLine)
+                {
+                    yield return null;
+                    hitNextLine = Input.touchCount > 0 || Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1);
+
+                    if (hitNextLine && !isDialogFinish)
+                        hitNextLine = false;
+                }
             }
-        }
 
-        _inputHandler.InputLocked = false;
-        _hint.gameObject.SetActive(true);
-        OpenDialog(false);
+            inputHandler.InputLocked = false;
+            OpenDialog(false);
+            dialogRoutine = null;
 
-        if (!_isInTutorial)
-        {
-            UIGameSceneManager sceneManager = FindObjectOfType<UIGameSceneManager>();
-            if (sceneManager != null)
+            // Check tutorial finished
+            if (!isDoingTutorial)
                 sceneManager.LoadScene(0);
         }
-    }
 
-    private IEnumerator DialogAnimation(string txt)
-    {
-        int txtLength = txt.Length;
-        _textShow.text = "";
-        bool isTapNextContinue = false;
-        while (_textShow.text.Length < txtLength || !isTapNextContinue)
+        private IEnumerator DialogAnimation(string txt)
         {
-            try
+            int txtLength = txt.Length;
+            tutorTextDisplay.text = "";
+            bool isTapNextContinue = false;
+            while (tutorTextDisplay.text.Length < txtLength || !isTapNextContinue)
             {
-                _textShow.text += txt[_textShow.text.Length];
-            } 
-            catch (System.IndexOutOfRangeException e)
-            {
-                // Do Nothing
-            }
-            
-            yield return null;
+                if (txtLength > tutorTextDisplay.text.Length)
+                    tutorTextDisplay.text += txt[tutorTextDisplay.text.Length];
 
-            if ((Input.touchCount > 0 || Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) && _textShow.text.Length < txtLength)
-                _textShow.text = txt;
-            else if (Input.touchCount > 0 || Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
-                isTapNextContinue = true;
+                yield return null;
+
+                if ((Input.touchCount > 0 || Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) && tutorTextDisplay.text.Length < txtLength)
+                    tutorTextDisplay.text = txt;
+                else if (Input.touchCount > 0 || Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+                    isTapNextContinue = true;
+            }
+
+            isDialogFinish = true;
         }
 
-        _isDialogLineFinish = true;
     }
+
 }

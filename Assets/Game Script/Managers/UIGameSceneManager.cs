@@ -21,6 +21,11 @@ public class UIGameSceneManager : MonoBehaviour
         StartCoroutine(LoadSceneAsync(sceneIndex));
     }
 
+    public void LoadScene(string sceneName)
+    {
+        StartCoroutine(LoadSceneAsync(sceneName));
+    }
+
     private IEnumerator LoadSceneAsync(int sceneIndex)
     {
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
@@ -35,6 +40,24 @@ public class UIGameSceneManager : MonoBehaviour
             if (_loadingText != null)
                 _loadingText.text = $"{progress}%";
             
+            yield return null;
+        }
+    }
+
+    private IEnumerator LoadSceneAsync(string sceneName)
+    {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
+
+        while (!asyncLoad.isDone)
+        {
+            float progress = asyncLoad.progress * 1000 / 9f;
+
+            if (_loadingBar != null)
+                _loadingBar.value = progress;
+
+            if (_loadingText != null)
+                _loadingText.text = $"{progress}%";
+
             yield return null;
         }
     }

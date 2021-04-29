@@ -17,16 +17,16 @@ TagManager:
   - Item Layer
   - Ground
   - Floating Item
-  - Wall
-  - Entities
-  - Anti Ground
   - 
+  - Entities
+  - 
+  - Interactable
   - 
   - 
   - 
   - VOID
   - 
-  - Tutorial Triggerer Wall
+  - 
   - 
   - 
   - 

@@ -39,7 +39,7 @@ public class ObjectFollower : MonoBehaviour
     }
 
     // Update is called once per frame
-    protected virtual void FixedUpdate()
+    protected virtual void Update()
     {
         Vector3 _currentTargetPos = _target.transform.position;
         if (_currentTargetPos.x != _targetLastPos.x || _currentTargetPos.y != _targetLastPos.y)

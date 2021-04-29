@@ -2,224 +2,307 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IGameEventArgs
+namespace BNEGame
 {
-
-}
-
-public static class EventHandler
-{
-    // Technical Events
-    public delegate void WindowResize(Vector2Int prevSize, Vector2Int newSize);
-
-    public static event WindowResize OnWindowResizeEvent;
-
-    // In Game Events
-    public delegate void ArrowHitVictim(ArrowHitEventArgs args);
-    public delegate void GameStarted(GameStartedEventArgs args);
-    public delegate void GameEnded(GameEndedEventArgs args);
-    public delegate void PlayerShoot(PlayerShootEventArgs args);
-    public delegate void PlayerCollectItem(PlayerCollectItemEventArgs args);
-    public delegate void PauseGamePress(PauseGamePressEventArgs args);
-    public delegate void PlayerChangeArrow(PlayerChangeArrowEventArgs args);
-    public delegate void EntityDeath(EntityDeathEventArgs args);
-    public delegate void PlayerRespawn(PlayerRespawnEventArgs args);
-    
-
-    public static event ArrowHitVictim OnArrowHitEvent;
-    public static event GameStarted OnGameStartedEvent;
-    public static event GameEnded OnGameEndedEvent;
-    public static event PlayerShoot OnPlayerShootEvent;
-    public static event PlayerCollectItem OnPlayerCollectedItemEvent;
-    public static event PauseGamePress OnGamePauseEvent;
-    public static event PlayerChangeArrow OnPlayerChangeArrowEvent;
-    public static event EntityDeath OnEntityDeathEvent;
-    public static event PlayerRespawn OnPlayerRespawnEvent;
-
-    public static void CallWindowResizeEvent(Vector2Int prevSize, Vector2Int newSize)
-    {
-        OnWindowResizeEvent?.Invoke(prevSize, newSize);
-    }
-
-    public static void CallEvent(IGameEventArgs ev)
-    {
-        if (ev is ArrowHitEventArgs)
-            OnArrowHitEvent?.Invoke((ArrowHitEventArgs)ev);
-        else if (ev is GameStartedEventArgs)
-            OnGameStartedEvent?.Invoke((GameStartedEventArgs)ev);
-        else if (ev is GameEndedEventArgs)
-            OnGameEndedEvent?.Invoke((GameEndedEventArgs)ev);
-        else if (ev is PlayerShootEventArgs)
-            OnPlayerShootEvent?.Invoke((PlayerShootEventArgs)ev);
-        else if (ev is PlayerCollectItemEventArgs)
-            OnPlayerCollectedItemEvent?.Invoke((PlayerCollectItemEventArgs)ev);
-        else if (ev is PauseGamePressEventArgs)
-            OnGamePauseEvent?.Invoke((PauseGamePressEventArgs)ev);
-        else if (ev is PlayerChangeArrowEventArgs)
-            OnPlayerChangeArrowEvent?.Invoke((PlayerChangeArrowEventArgs)ev);
-        else if (ev is EntityDeathEventArgs)
-            OnEntityDeathEvent?.Invoke((EntityDeathEventArgs)ev);
-        else if (ev is PlayerRespawnEventArgs)
-            OnPlayerRespawnEvent?.Invoke((PlayerRespawnEventArgs)ev);
-    }
-}
-
-public class ArrowHitEventArgs : IGameEventArgs, ICancelAbleAction
-{
-    private Collider2D _victim;
-    private LivingEntity _shooter;
-    private ArrowBehaviour _arrow;
-    private bool _isCancelled;
-
-    public Collider2D VictimHit => _victim;
-    public LivingEntity EntityShooter => _shooter;
-    public ArrowBehaviour ArrowHit => _arrow;
-    public bool IsCancelled => _isCancelled;
-
-    public ArrowHitEventArgs(LivingEntity shooter, Collider2D victim, ArrowBehaviour arrow)
-    {
-        _victim = victim;
-        _shooter = shooter;
-        _arrow = arrow;
-    }
-
-    public void CancelAction(bool cancel)
-    {
-        _isCancelled = cancel;
-    }
-}
-
-public class GameStartedEventArgs : IGameEventArgs
-{
-    public GameStartedEventArgs()
+    public interface IGameEventArgs
     {
 
     }
-}
 
-public class GameEndedEventArgs : IGameEventArgs
-{
-    public GameEndedEventArgs()
+    public static class EventHandler
     {
+        // Technical Events
+        public delegate void WindowResize(Vector2Int prevSize, Vector2Int newSize);
 
-    }
-}
+        public static event WindowResize OnWindowResizeEvent;
 
-public class PlayerShootEventArgs : IGameEventArgs, ICancelAbleAction
-{
-    private PlayerEntity _player;
-    private Vector2 _shootDir;
-    private ArrowTypes _type;
-    private ArrowBehaviour _arrow;
-    private bool _isCancelled;
-    private bool _keepQuantity;
+        // In Game Events
+        public delegate void ArrowHitVictim(ArrowHitEventArgs args);
+        public delegate void GameStarted(GameStartedEventArgs args);
+        public delegate void GameEnded(GameEndedEventArgs args);
+        public delegate void PlayerShoot(PlayerShootEventArgs args);
+        public delegate void PlayerCollectItem(PlayerCollectItemEventArgs args);
+        public delegate void PauseGamePress(PauseGamePressEventArgs args);
+        public delegate void PlayerChangeArrow(PlayerChangeArrowEventArgs args);
+        public delegate void EntityDeath(EntityDeathEventArgs args);
+        public delegate void PlayerRespawn(PlayerRespawnEventArgs args);
+        public delegate void ItemSpawned(ItemSpawnedEventArgs args);
+        public delegate void MsgSent(MsgSentEventArgs args);
 
-    public PlayerEntity Player => _player;
-    public Vector2 ShootDirection => _shootDir;
-    public ArrowTypes TypeOfArrow => _type;
-    public bool IsCancelled => _isCancelled;
 
-    public bool KeepQuantity
-    {
-        set => _keepQuantity = value;
-        get => _keepQuantity;
-    }
+        public static event ArrowHitVictim OnArrowHitEvent;
+        public static event GameStarted OnGameStartedEvent;
+        public static event GameEnded OnGameEndedEvent;
+        public static event PlayerShoot OnPlayerShootEvent;
+        public static event PlayerCollectItem OnPlayerCollectedItemEvent;
+        public static event PauseGamePress OnGamePauseEvent;
+        public static event PlayerChangeArrow OnPlayerChangeArrowEvent;
+        public static event EntityDeath OnEntityDeathEvent;
+        public static event PlayerRespawn OnPlayerRespawnEvent;
+        public static event ItemSpawned OnItemSpawnedEvent;
+        public static event MsgSent OnMsgSentEvent;
 
-    public ArrowBehaviour ArrowObject => _arrow;
+        public static void CallWindowResizeEvent(Vector2Int prevSize, Vector2Int newSize)
+        {
+            OnWindowResizeEvent?.Invoke(prevSize, newSize);
+        }
 
-    public PlayerShootEventArgs(PlayerEntity player, Vector2 shootDir, ArrowBehaviour arrow)
-    {
-        _player = player;
-        _shootDir = shootDir;
-        _arrow = arrow;
-        _arrow.WhoShot = _player;
-        _type = _arrow.TypeOfArrow;
-        _isCancelled = false;
-        _keepQuantity = false;
-    }
-
-    public void CancelAction(bool cancel)
-    {
-        _isCancelled = cancel;
-    }
-}
-
-public class PlayerCollectItemEventArgs : IGameEventArgs
-{
-    private PlayerEntity _player;
-    private FloatingItemBehaviour _collectedItem;
-
-    public PlayerEntity Player => _player;
-    public FloatingItemBehaviour CollectedItem => _collectedItem;
-    public IElementInfo InfoElement => _collectedItem.ItemInfo;
-
-    public PlayerCollectItemEventArgs(PlayerEntity player, FloatingItemBehaviour floatingItem)
-    {
-        _player = player;
-        _collectedItem = floatingItem;
-    }
-}
-
-public class PauseGamePressEventArgs : IGameEventArgs
-{
-    private SingleGameMode _mode;
-    private bool _isPause;
-
-    public SingleGameMode Mode => _mode;
-    public bool IsPause => _isPause;
-
-    public PauseGamePressEventArgs(SingleGameMode mode, bool pause)
-    {
-        _mode = mode;
-        _isPause = pause;
-    }
-}
-
-public class PlayerChangeArrowEventArgs : IGameEventArgs
-{
-    public PlayerEntity _player;
-    public ArrowTypes _changeArrowTo;
-
-    public PlayerEntity Player => _player;
-    public ArrowTypes ChangeTo => _changeArrowTo;
-
-    public PlayerChangeArrowEventArgs(PlayerEntity player, ArrowTypes arrowTo)
-    {
-        _player = player;
-        _changeArrowTo = arrowTo;
-    }
-}
-
-public class EntityDeathEventArgs : IGameEventArgs, ICancelAbleAction
-{
-    private LivingEntity _entityDied;
-    private LivingEntity _whoKill;
-    private bool _isCancelled = false;
-
-    public LivingEntity EntityVictim => _entityDied;
-
-    /// <summary>
-    /// Who killed the entity, it returns null if not exists.
-    /// </summary>
-    public LivingEntity WhoKill => _whoKill;
-    public bool IsCancelled => _isCancelled;
-
-    public EntityDeathEventArgs(LivingEntity entityDied, LivingEntity whoKill = null)
-    {
-        _entityDied = entityDied;
-        _whoKill = whoKill;
+        public static void CallEvent(IGameEventArgs ev)
+        {
+            if (ev is ArrowHitEventArgs)
+                OnArrowHitEvent?.Invoke((ArrowHitEventArgs)ev);
+            else if (ev is GameStartedEventArgs)
+                OnGameStartedEvent?.Invoke((GameStartedEventArgs)ev);
+            else if (ev is GameEndedEventArgs)
+                OnGameEndedEvent?.Invoke((GameEndedEventArgs)ev);
+            else if (ev is PlayerShootEventArgs)
+                OnPlayerShootEvent?.Invoke((PlayerShootEventArgs)ev);
+            else if (ev is PlayerCollectItemEventArgs)
+                OnPlayerCollectedItemEvent?.Invoke((PlayerCollectItemEventArgs)ev);
+            else if (ev is PauseGamePressEventArgs)
+                OnGamePauseEvent?.Invoke((PauseGamePressEventArgs)ev);
+            else if (ev is PlayerChangeArrowEventArgs)
+                OnPlayerChangeArrowEvent?.Invoke((PlayerChangeArrowEventArgs)ev);
+            else if (ev is EntityDeathEventArgs)
+                OnEntityDeathEvent?.Invoke((EntityDeathEventArgs)ev);
+            else if (ev is PlayerRespawnEventArgs)
+                OnPlayerRespawnEvent?.Invoke((PlayerRespawnEventArgs)ev);
+            else if (ev is ItemSpawnedEventArgs)
+                OnItemSpawnedEvent?.Invoke((ItemSpawnedEventArgs)ev);
+            else if (ev is MsgSentEventArgs)
+                OnMsgSentEvent?.Invoke((MsgSentEventArgs)ev);
+        }
     }
 
-    public void CancelAction(bool cancel)
+    public class ArrowHitEventArgs : IGameEventArgs, ICancelAbleAction
     {
-        _isCancelled = cancel;
+        private Collider2D victim;
+        private LivingEntity shooter;
+        private ArrowBehaviour arrow;
+        private bool isCancelled;
+
+        public Collider2D VictimHit => victim;
+        public LivingEntity EntityShooter => shooter;
+        public ArrowBehaviour ArrowHit => arrow;
+        public bool IsCancelled => isCancelled;
+
+        public ArrowHitEventArgs(LivingEntity shooter, Collider2D victim, ArrowBehaviour arrow)
+        {
+            this.victim = victim;
+            this.shooter = shooter;
+            this.arrow = arrow;
+        }
+
+        public void CancelAction(bool cancel)
+        {
+            isCancelled = cancel;
+        }
     }
-}
 
-public class PlayerRespawnEventArgs : IGameEventArgs
-{
-    public PlayerRespawnEventArgs()
+    public class GameStartedEventArgs : IGameEventArgs
     {
+        private BNEGameState oldState;
+        private BNEGameState nextState;
 
+        public BNEGameState PrevState => oldState;
+        public BNEGameState NextState => nextState;
+
+        public GameStartedEventArgs(BNEGameState oldState, BNEGameState nextState)
+        {
+            this.oldState = oldState;
+            this.nextState = nextState;
+        }
+    }
+
+    public class GameEndedEventArgs : IGameEventArgs
+    {
+        public GameEndedEventArgs()
+        {
+
+        }
+    }
+
+    public class PlayerShootEventArgs : IGameEventArgs, ICancelAbleAction
+    {
+        private PlayerEntity player;
+        private Vector2 shootDir;
+        private ArrowTypes typeArrow;
+        private ArrowBehaviour arrow;
+        private bool isCancelled;
+
+        public PlayerEntity Player => player;
+        public Vector2 ShootDirection => shootDir;
+        public ArrowTypes TypeArrow => typeArrow;
+        public bool IsCancelled => isCancelled;
+
+        public ArrowBehaviour ArrowObject => arrow;
+
+        public PlayerShootEventArgs(PlayerEntity player, Vector2 shootDir, ArrowBehaviour arrow)
+        {
+            this.player = player;
+            this.shootDir = shootDir;
+            this.arrow = arrow;
+            this.arrow.WhoShot = this.player;
+            typeArrow = this.arrow.TypeOfArrow;
+            isCancelled = false;
+        }
+
+        public void CancelAction(bool cancel)
+        {
+            isCancelled = cancel;
+        }
+    }
+
+    public class PlayerCollectItemEventArgs : IGameEventArgs, ICancelAbleAction
+    {
+        private int indexCollected;
+        private PlayerEntity player;
+        private FloatingItemBehaviour collectedItem;
+        private bool _isCancelled = false;
+
+        public PlayerEntity Player => player;
+        public int IndexCollected => indexCollected;
+        public FloatingItemBehaviour CollectedItem => collectedItem;
+        public IElementItemInfo InfoElement => collectedItem.ItemInfo;
+
+        public bool IsCancelled => _isCancelled;
+
+        public PlayerCollectItemEventArgs(int indexCollected, PlayerEntity player, FloatingItemBehaviour collectedItem)
+        {
+            this.indexCollected = indexCollected;
+            this.player = player;
+            this.collectedItem = collectedItem;
+        }
+
+        public void CancelAction(bool cancel)
+        {
+            _isCancelled = cancel;
+        }
+    }
+
+    public class PauseGamePressEventArgs : IGameEventArgs
+    {
+        private bool isPause;
+
+        public bool IsPause => isPause;
+
+        public PauseGamePressEventArgs(bool isPause)
+        {
+            this.isPause = isPause;
+        }
+    }
+
+    public class PlayerChangeArrowEventArgs : IGameEventArgs
+    {
+        public PlayerEntity player;
+        public ArrowTypes changeArrowTo;
+
+        public PlayerEntity Player => player;
+        public ArrowTypes ChangeTo => changeArrowTo;
+
+        public PlayerChangeArrowEventArgs(PlayerEntity player, ArrowTypes arrowTo)
+        {
+            this.player = player;
+            changeArrowTo = arrowTo;
+        }
+    }
+
+    public class EntityDeathEventArgs : IGameEventArgs, ICancelAbleAction
+    {
+        private LivingEntity victim;
+        private LivingEntity whoKill;
+        private bool _isCancelled = false;
+
+        public LivingEntity EntityVictim => victim;
+
+        /// <summary>
+        /// Who killed the entity, it returns null if not exists.
+        /// </summary>
+        public LivingEntity WhoKill => whoKill;
+        public bool IsCancelled => _isCancelled;
+
+        public EntityDeathEventArgs(LivingEntity victim, LivingEntity whoKill = null)
+        {
+            this.victim = victim;
+            this.whoKill = whoKill;
+        }
+
+        public void CancelAction(bool cancel)
+        {
+            _isCancelled = cancel;
+        }
+    }
+
+    public class PlayerRespawnEventArgs : IGameEventArgs, ICancelAbleAction
+    {
+        private PlayerEntity player;
+        private bool isCancelled = false;
+
+        public PlayerEntity Player => player;
+        public bool IsCancelled => isCancelled;
+
+        public PlayerRespawnEventArgs(PlayerEntity player)
+        {
+            this.player = player;
+        }
+
+        public void CancelAction(bool cancel)
+        {
+            isCancelled = cancel;
+        }
+    }
+
+    public class ItemSpawnedEventArgs : IGameEventArgs, ICancelAbleAction
+    {
+        private int indexSpawn;
+        private IElementItemInfo spawnedItemInfo;
+        private bool _isCancelled = false;
+
+        public IElementItemInfo SpawnedItemInfo => spawnedItemInfo;
+        public int IndexSpawned => indexSpawn;
+        public bool IsCancelled => _isCancelled;
+
+        public ItemSpawnedEventArgs(int indexSpawn, IElementItemInfo spawnedItemInfo)
+        {
+            this.indexSpawn = indexSpawn;
+            this.spawnedItemInfo = spawnedItemInfo;
+        }
+
+        public void CancelAction(bool cancel)
+        {
+            _isCancelled = cancel;
+        }
+    }
+
+    public class MsgSentEventArgs : IGameEventArgs, ICancelAbleAction
+    {
+        private string msg;
+        private Color color;
+        private bool isCancelled = false;
+
+        public string Message => msg;
+        public Color MsgColor => color;
+        public bool IsCancelled => isCancelled;
+
+        public MsgSentEventArgs(string msg, Color color)
+        {
+            this.msg = msg;
+            this.color = color;
+        }
+
+        public void SetMessage(string msg)
+        {
+            this.msg = msg;
+        }
+
+        public void SetColor(Color color)
+        {
+            this.color = color;
+        }
+
+        public void CancelAction(bool cancel)
+        {
+            isCancelled = cancel;
+        }
     }
 }
